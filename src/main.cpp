@@ -10,8 +10,10 @@ using namespace std;
 
 //Step Size
 volatile uint32_t currentStepSize;
-volatile uint32_t knobCount;
-volatile uint32_t prevKnob;
+volatile uint32_t knobCount3;
+volatile uint32_t prevKnob3;
+volatile uint32_t knobCount2;
+volatile uint32_t prevKnob2;
 
 //Key String/Array
 volatile uint32_t keyVal;
@@ -142,35 +144,46 @@ uint32_t readCols(){
   return retval;
 }
 
-u_int32_t readKnobs(){
-  uint32_t retval = 0;
-  //GET KNOB3
+void readKnobs(){
+  uint32_t knob3 = 0;
+  uint32_t knob2 = 0;
   digitalWrite(RA0_PIN, HIGH);
   digitalWrite(RA1_PIN, HIGH);
   digitalWrite(RA2_PIN, LOW);
   digitalWrite(REN_PIN, HIGH);
   delayMicroseconds(3);
-  retval += 2*digitalRead(C0_PIN);
-  retval += 1*digitalRead(C1_PIN);
+  //GET KNOB2 
+  knob2 += 2*digitalRead(C2_PIN);
+  knob2 += 1*digitalRead(C3_PIN);
+  //GET KNOB3
+  knob3 += 2*digitalRead(C0_PIN);
+  knob3 += 1*digitalRead(C1_PIN);
 
-  if(((retval==1 && prevKnob==0)||(retval==2 && prevKnob==3))&&knobCount<5){
-    knobCount += 1;
+  if(((knob3==1 && prevKnob3==0)||(knob3==2 && prevKnob3==3))&&knobCount3<5){
+    knobCount3 += 1;
   }
-  else if(((retval==0 && prevKnob==1)||(retval==3 && prevKnob==2))&&knobCount>0){
-    knobCount += -1;
+  else if(((knob3==0 && prevKnob3==1)||(knob3==3 && prevKnob3==2))&&knobCount3>0){
+    knobCount3 += -1;
   }
-  prevKnob = retval;
+  prevKnob3 = knob3;
 
-  return retval;
+  if(((knob2==1 && prevKnob2==0)||(knob2==2 && prevKnob2==3))&&knobCount2<5){
+    knobCount2 += 1;
+  }
+  else if(((knob2==0 && prevKnob2==1)||(knob2==3 && prevKnob2==2))&&knobCount2>0){
+    knobCount2 += -1;
+  }
+  prevKnob2 = knob2;
 }
 
 long testvar = 0;
 
 void sampleISR(){
   static uint32_t phaseAcc = 0;
-  phaseAcc = phaseAcc + currentStepSize;
+  phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
+  testvar = phaseAcc;
   uint32_t Vout = (phaseAcc>>24) - 128;
-  analogWrite(OUTR_PIN, (Vout + 128)>>knobCount);
+  analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
   time = time + incrbitshift16;
 }
 
@@ -208,8 +221,9 @@ void displayUpdateTask(void * pvParameters){
     u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
     //u8g2.drawStr(2,10,"Helllo World!");  // write something to the internal memory
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
-    u8g2.drawStr(2,20,intToBinaryString(keyVal));
-    u8g2.drawStr(2,10,("Volume: "+to_string(5-knobCount)).c_str());
+    u8g2.drawStr(2,10,intToBinaryString(keyVal));
+    u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
+    u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
     xSemaphoreGive(keyArrayMutex);
     //currentStepSize = keystepmap[readCols()];
     u8g2.setCursor(2,20);
@@ -219,7 +233,8 @@ void displayUpdateTask(void * pvParameters){
     cout << intToBinaryString(readCols()) << endl;
     digitalToggle(LED_BUILTIN);
     cout << testvar << endl;
-    cout << knobCount << endl;
+    cout << knobCount3 << endl;
+    cout << knobCount2 << endl;
   }
 }
 
