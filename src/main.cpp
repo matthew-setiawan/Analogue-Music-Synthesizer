@@ -89,8 +89,8 @@ void setOutMuxBit(const uint8_t bitIdx, const bool value) {
 }
 
 const char* intToBinaryString(int value) {
-    static char buffer[15];  // Allocate a buffer to hold the binary string
-    std::bitset<14> bits((value & 0xFFF));  // Mask the last 12 bits and convert to binary format
+    static char buffer[13];  // Allocate a buffer to hold the binary string
+    std::bitset<12> bits((value & 0xFFF));  // Mask the last 12 bits and convert to binary format
     std::string binaryString = bits.to_string();  // Convert the binary format to a std::string
     binaryString.copy(buffer, sizeof(buffer));  // Copy the std::string to the buffer
     buffer[sizeof(buffer) - 1] = '\0';  // Add a null terminator to the end of the buffer
@@ -153,12 +153,13 @@ u_int32_t readKnobs(){
   retval += 2*digitalRead(C0_PIN);
   retval += 1*digitalRead(C1_PIN);
 
-  if((retval==1 && prevKnob==0)||(retval==2 && prevKnob==3)){
+  if(((retval==1 && prevKnob==0)||(retval==2 && prevKnob==3))&&knobCount<5){
     knobCount += 1;
   }
-  else if((retval==0 && prevKnob==1)||(retval==3 && prevKnob==2)){
+  else if(((retval==0 && prevKnob==1)||(retval==3 && prevKnob==2))&&knobCount>0){
     knobCount += -1;
   }
+  prevKnob = retval;
 
   return retval;
 }
@@ -169,7 +170,7 @@ void sampleISR(){
   static uint32_t phaseAcc = 0;
   phaseAcc = phaseAcc + currentStepSize;
   uint32_t Vout = (phaseAcc>>24) - 128;
-  analogWrite(OUTR_PIN, (Vout + 128)>>3);
+  analogWrite(OUTR_PIN, (Vout + 128)>>knobCount);
   time = time + incrbitshift16;
 }
 
@@ -179,17 +180,18 @@ void scanKeysTask(void * pvParameters) {
   while(1){
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
-    keyVal = readCols()+readKnobs();
+    keyVal = readCols();
+    readKnobs();
     xSemaphoreGive(keyArrayMutex);
-    if(readCols()%4096==4095){
+    if(readCols()==4095){
         currentStepSize = stepSizes[0];
     }
     else{
       int indexs[12];
       int playedcount = 0;
-      for(int i = 2; i < 14; i++){
+      for(int i = 0; i < 12; i++){
         if(intToBinaryString(readCols())[i]=='0'){
-          currentStepSize = stepSizes[i-1];
+          currentStepSize = stepSizes[i+1];
           delayMicroseconds(20);
         }
       }
@@ -207,7 +209,7 @@ void displayUpdateTask(void * pvParameters){
     //u8g2.drawStr(2,10,"Helllo World!");  // write something to the internal memory
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
     u8g2.drawStr(2,20,intToBinaryString(keyVal));
-    u8g2.drawStr(2,10,to_string(keyvalmap[intToBinaryString(keyVal)]).c_str());
+    u8g2.drawStr(2,10,("Volume: "+to_string(5-knobCount)).c_str());
     xSemaphoreGive(keyArrayMutex);
     //currentStepSize = keystepmap[readCols()];
     u8g2.setCursor(2,20);
