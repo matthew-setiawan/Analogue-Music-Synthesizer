@@ -24,5 +24,10 @@
   
   ## Dependencies
 
+  ## Advanced Features Added
+  
+  Description of the advanced features we had added...
+
+
 ## Additional Information
   [Handshaking and auto-detection](doc/handshaking.md)
