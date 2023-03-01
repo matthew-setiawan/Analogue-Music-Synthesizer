@@ -6,7 +6,11 @@
 #include <bitset>
 #include <STM32FreeRTOS.h>
 #include <cmath>
+#include <ES_CAN.h>
 using namespace std;
+
+QueueHandle_t msgInQ;
+QueueHandle_t msgOutQ;
 
 //Step Size
 volatile uint32_t currentStepSize;
@@ -21,7 +25,9 @@ volatile uint32_t keyVal;
 //Constants
 const long pibitshift16 = 205887; // define the value of pi
 const long incrbitshift16 = 3;
+
 SemaphoreHandle_t keyArrayMutex;
+SemaphoreHandle_t CAN_TX_Semaphore;
 
 //Time
 int time = 0;
@@ -181,7 +187,6 @@ long testvar = 0;
 void sampleISR(){
   static uint32_t phaseAcc = 0;
   phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
-  testvar = phaseAcc;
   uint32_t Vout = (phaseAcc>>24) - 128;
   analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
   time = time + incrbitshift16;
@@ -209,6 +214,9 @@ void scanKeysTask(void * pvParameters) {
         }
       }
     }
+    uint8_t TX_Message[8] = {0};
+    TX_Message[1] = 10;
+    CAN_TX(0x123, TX_Message);
   }
 }
 
@@ -235,11 +243,49 @@ void displayUpdateTask(void * pvParameters){
     cout << testvar << endl;
     cout << knobCount3 << endl;
     cout << knobCount2 << endl;
+
+    uint8_t RX_Message[8] = {0};
+    uint32_t ID = 0x123;
   }
+}
+
+void decodeTask(void *pvParameters)
+{
+  int8_t misses = 0; // Checks how many times middle CAN has been missed
+  while (true)
+  {
+    uint8_t RX_Message_local[8];
+    uint32_t ID_Local = 0;
+    xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
+    testvar = RX_Message_local[1];
+  }
+}
+
+void CAN_RX_ISR (void) {
+	uint8_t RX_Message_ISR[8];
+	uint32_t ID;
+	CAN_RX(ID, RX_Message_ISR);
+	xQueueSendFromISR(msgInQ, RX_Message_ISR, NULL);
+}
+
+void CAN_TX_Task (void * pvParameters) {
+	uint8_t msgOut[8];
+	while (1) {
+	xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
+		xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
+		CAN_TX(0x123, msgOut);
+	}
+}
+
+void CAN_TX_ISR (void) {
+	xSemaphoreGiveFromISR(CAN_TX_Semaphore, NULL);
 }
 
 void setup() {
   // put your setup code here, to run once:
+  msgInQ = xQueueCreate(36,8);
+  msgOutQ = xQueueCreate(36, 8);
+  CAN_TX_Semaphore = xSemaphoreCreateCounting(3,3);
 
   //Set pin directions
   pinMode(RA0_PIN, OUTPUT);
@@ -269,6 +315,13 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Hello World");
 
+  //Initialise CAN Communication
+  CAN_Init(true);
+  setCANFilter(0x123,0x7ff);
+  CAN_RegisterTX_ISR(CAN_TX_ISR);
+  CAN_RegisterRX_ISR(CAN_RX_ISR);
+  CAN_Start();
+
   //Interrupt for sampleISR()
   TIM_TypeDef *Instance = TIM1;
   HardwareTimer *sampleTimer = new HardwareTimer(Instance);
@@ -293,6 +346,23 @@ void setup() {
   NULL,                  /* Parameter passed into the task */
   1,                     /* Task priority */
   &displayUpdateHandle);
+
+  TaskHandle_t CAN_TX_Handle = NULL;
+  xTaskCreate(CAN_TX_Task, /* Function that implements the task */
+  "CAN_TX",    /* Text name for the task */
+  32,          /* Stack size in words, not bytes */
+  NULL,        /* Parameter passed into the task */
+  1,           /* Task priority */
+  &CAN_TX_Handle);
+
+  TaskHandle_t decodeHandle = NULL;
+  xTaskCreate(
+  decodeTask,   /* Function that implements the task */
+  "decodeTask", /* Text name for the task */
+  32,           /* Stack size in words, not bytes */
+  NULL,         /* Parameter passed into the task */
+  1,            /* Task priority */
+  &decodeHandle);
 
   //Knobs
   keyArrayMutex = xSemaphoreCreateMutex();
