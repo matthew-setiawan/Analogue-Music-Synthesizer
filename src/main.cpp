@@ -215,8 +215,8 @@ void scanKeysTask(void * pvParameters) {
       }
     }
     uint8_t TX_Message[8] = {0};
-    TX_Message[1] = 10;
-    CAN_TX(0x123, TX_Message);
+    //TX_Message[1] = 10;
+    //CAN_TX(0x123, TX_Message);
   }
 }
 
@@ -243,9 +243,6 @@ void displayUpdateTask(void * pvParameters){
     cout << testvar << endl;
     cout << knobCount3 << endl;
     cout << knobCount2 << endl;
-
-    uint8_t RX_Message[8] = {0};
-    uint32_t ID = 0x123;
   }
 }
 
@@ -269,10 +266,11 @@ void CAN_RX_ISR (void) {
 }
 
 void CAN_TX_Task (void * pvParameters) {
-	uint8_t msgOut[8];
+	uint8_t msgOut[8] = {0};
 	while (1) {
-	xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
-		xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
+	  //xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
+		//xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
+    msgOut[1] = 10;
 		CAN_TX(0x123, msgOut);
 	}
 }
