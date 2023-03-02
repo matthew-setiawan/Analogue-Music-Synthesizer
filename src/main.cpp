@@ -7,10 +7,14 @@
 #include <STM32FreeRTOS.h>
 #include <cmath>
 #include <ES_CAN.h>
+#include <ctime>
 using namespace std;
 
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
+
+//sin array
+u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
 
 //Step Size
 volatile uint32_t currentStepSize;
@@ -18,6 +22,11 @@ volatile uint32_t knobCount3;
 volatile uint32_t prevKnob3;
 volatile uint32_t knobCount2;
 volatile uint32_t prevKnob2;
+
+volatile uint32_t knobCount1;
+volatile uint32_t prevKnob1;
+volatile uint32_t knobCount0;
+volatile uint32_t prevKnob0;
 
 //Key String/Array
 volatile uint32_t keyVal;
@@ -28,9 +37,6 @@ const long incrbitshift16 = 3;
 
 SemaphoreHandle_t keyArrayMutex;
 SemaphoreHandle_t CAN_TX_Semaphore;
-
-//Time
-int time = 0;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -83,6 +89,12 @@ const int HKOE_BIT = 6;
 
 //Display driver object
 U8G2_SSD1305_128X32_NONAME_F_HW_I2C u8g2(U8G2_R0);
+
+//Function to generate random number
+int random(int x, int y) {
+    int random_number = rand() % (y - x + 1) + x; // Generate a random number between x and y inclusive
+    return random_number;
+}
 
 //Function to set outputs using key matrix
 void setOutMuxBit(const uint8_t bitIdx, const bool value) {
@@ -184,12 +196,58 @@ void readKnobs(){
 
 long testvar = 0;
 
+void readKnobs01(){
+  uint32_t knob1 = 0;
+  uint32_t knob0 = 0;
+  digitalWrite(RA0_PIN, LOW);
+  digitalWrite(RA1_PIN, LOW);
+  digitalWrite(RA2_PIN, HIGH);
+  digitalWrite(REN_PIN, HIGH);
+  delayMicroseconds(3);
+  //GET KNOB0
+  knob0 += 2*digitalRead(C2_PIN);
+  knob0 += 1*digitalRead(C3_PIN);
+  //GET KNOB1
+  knob1 += 2*digitalRead(C0_PIN);
+  knob1 += 1*digitalRead(C1_PIN);
+
+  if(((knob0==1 && prevKnob0==0)||(knob0==2 && prevKnob0==3))&&knobCount0<3){
+    knobCount0 += 1;
+  }
+  else if(((knob0==0 && prevKnob0==1)||(knob0==3 && prevKnob0==2))&&knobCount0>-3){
+    knobCount0 += -1;
+  }
+  prevKnob0 = knob0;
+
+  if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<5){
+    knobCount1 += 1;
+  }
+  else if(((knob1==0 && prevKnob1==1)||(knob1==3 && prevKnob1==2))&&knobCount1>0){
+    knobCount1 += -1;
+  }
+  prevKnob1 = knob1;
+}
+
 void sampleISR(){
+  /*
   static uint32_t phaseAcc = 0;
   phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
   uint32_t Vout = (phaseAcc>>24) - 128;
+  testvar = Vout;
   analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
-  time = time + incrbitshift16;
+  */
+  static uint32_t clocktick = 0;
+  uint32_t Vout;
+  u_int32_t index = ((((currentStepSize<<2)>>knobCount2)*clocktick)>>22)%360;
+  if(index>=180){
+    Vout = -sinarr[(index-180)>>1];
+  }
+  else{
+    Vout = sinarr[(index)>>1];
+  }
+  testvar = clocktick;
+  analogWrite(OUTR_PIN, ((Vout+128)>>1)>>knobCount3);
+  clocktick +=1;
 }
 
 void scanKeysTask(void * pvParameters) {
@@ -200,6 +258,7 @@ void scanKeysTask(void * pvParameters) {
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
     keyVal = readCols();
     readKnobs();
+    readKnobs01();
     xSemaphoreGive(keyArrayMutex);
     if(readCols()==4095){
         currentStepSize = stepSizes[0];
@@ -209,10 +268,11 @@ void scanKeysTask(void * pvParameters) {
       int playedcount = 0;
       for(int i = 0; i < 12; i++){
         if(intToBinaryString(readCols())[i]=='0'){
-          currentStepSize = stepSizes[i+1];
-          delayMicroseconds(20);
+          indexs[playedcount] = stepSizes[i+1];
+          playedcount += 1;
         }
       }
+      currentStepSize = indexs[random(0,playedcount - 1)];
     }
     uint8_t TX_Message[8] = {0};
     //TX_Message[1] = 10;
@@ -243,6 +303,9 @@ void displayUpdateTask(void * pvParameters){
     cout << testvar << endl;
     cout << knobCount3 << endl;
     cout << knobCount2 << endl;
+    cout << knobCount1 << endl;
+    cout << knobCount0 << endl;
+
   }
 }
 
@@ -254,7 +317,7 @@ void decodeTask(void *pvParameters)
     uint8_t RX_Message_local[8];
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
-    testvar = RX_Message_local[1];
+    //testvar = RX_Message_local[1];
   }
 }
 
@@ -270,7 +333,7 @@ void CAN_TX_Task (void * pvParameters) {
 	while (1) {
 	  //xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
 		//xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
-    msgOut[1] = 10;
+    msgOut[1] = 100;
 		CAN_TX(0x123, msgOut);
 	}
 }
@@ -323,7 +386,7 @@ void setup() {
   //Interrupt for sampleISR()
   TIM_TypeDef *Instance = TIM1;
   HardwareTimer *sampleTimer = new HardwareTimer(Instance);
-  sampleTimer->setOverflow(44000, HERTZ_FORMAT);
+  sampleTimer->setOverflow(22000, HERTZ_FORMAT);
   sampleTimer->attachInterrupt(sampleISR);
   sampleTimer->resume();
 
