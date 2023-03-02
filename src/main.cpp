@@ -229,6 +229,7 @@ void readKnobs01(){
 }
 
 void sampleISR(){
+  //SAWTOOTH
   /*
   static uint32_t phaseAcc = 0;
   phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
@@ -236,6 +237,7 @@ void sampleISR(){
   testvar = Vout;
   analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
   */
+  //SIN WAVE
   static uint32_t clocktick = 0;
   uint32_t Vout;
   u_int32_t index = ((((currentStepSize<<2)>>knobCount2)*clocktick)>>22)%360;
