@@ -23,7 +23,7 @@ volatile uint32_t prevKnob3;
 volatile uint32_t knobCount2;
 volatile uint32_t prevKnob2;
 
-volatile uint32_t knobCount1;
+volatile uint32_t knobCount1 = 1;
 volatile uint32_t prevKnob1;
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
@@ -37,6 +37,10 @@ const long incrbitshift16 = 3;
 
 SemaphoreHandle_t keyArrayMutex;
 SemaphoreHandle_t CAN_TX_Semaphore;
+
+//Recieved Volume
+uint32_t mastervol = 0;
+uint32_t masteroct = 0;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -192,6 +196,7 @@ void readKnobs(){
     knobCount2 += -1;
   }
   prevKnob2 = knob2;
+
 }
 
 long testvar = 0;
@@ -219,13 +224,18 @@ void readKnobs01(){
   }
   prevKnob0 = knob0;
 
-  if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<5){
+  if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<3){
     knobCount1 += 1;
   }
   else if(((knob1==0 && prevKnob1==1)||(knob1==3 && prevKnob1==2))&&knobCount1>0){
     knobCount1 += -1;
   }
   prevKnob1 = knob1;
+
+  if(knobCount1 != 1){
+    knobCount3 = mastervol;
+    knobCount2 = masteroct;
+  }
 }
 
 void sampleISR(){
@@ -291,7 +301,17 @@ void displayUpdateTask(void * pvParameters){
     u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
     //u8g2.drawStr(2,10,"Helllo World!");  // write something to the internal memory
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
-    u8g2.drawStr(2,10,intToBinaryString(keyVal));
+    string state;
+    if(knobCount1 == 1){
+      state = "master";
+    }
+    else if(knobCount1 == 2){
+      state = "slave left";
+    }
+    else{
+      state = "slave right";
+    }
+    u8g2.drawStr(2,10,state.c_str());
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
     u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
     xSemaphoreGive(keyArrayMutex);
@@ -320,6 +340,20 @@ void decodeTask(void *pvParameters)
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
     //testvar = RX_Message_local[1];
+
+    if(knobCount1==0){//handling left slave
+      mastervol = RX_Message_local[2];
+      masteroct = RX_Message_local[1] + 1;
+    }
+    else if(knobCount1==2){//handling left slave
+      mastervol = RX_Message_local[2];
+      if(RX_Message_local[1]==0){
+        masteroct = 0;
+      }
+      else{
+        masteroct = RX_Message_local[1] - 1;
+      }
+    }
   }
 }
 
@@ -335,8 +369,11 @@ void CAN_TX_Task (void * pvParameters) {
 	while (1) {
 	  //xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
 		//xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
-    msgOut[1] = 100;
-		CAN_TX(0x123, msgOut);
+    if(knobCount1 == 1){
+      msgOut[1] = knobCount2;//sending octave
+      msgOut[2] = knobCount3;//sending volume
+		  CAN_TX(0x123, msgOut);
+    }
 	}
 }
 
@@ -379,7 +416,7 @@ void setup() {
   Serial.println("Hello World");
 
   //Initialise CAN Communication
-  CAN_Init(true);
+  CAN_Init(false);
   setCANFilter(0x123,0x7ff);
   CAN_RegisterTX_ISR(CAN_TX_ISR);
   CAN_RegisterRX_ISR(CAN_RX_ISR);
