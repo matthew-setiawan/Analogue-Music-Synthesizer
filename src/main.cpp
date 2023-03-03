@@ -270,6 +270,15 @@ void sampleISR(){
     tempkeyVal = tempkeyVal/2;
   }
   testvar = zeroCount;
+  if(zeroCount < 3){
+
+  }
+  else if(zeroCount < 9){
+    zeroCount = 3;
+  }
+  else if(zeroCount < 12){
+    zeroCount = 4;
+  }
   uint32_t Vres = Vfinal>>zeroCount;
   analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
   clocktick +=1;
