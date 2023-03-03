@@ -41,6 +41,7 @@ SemaphoreHandle_t CAN_TX_Semaphore;
 //Recieved Volume
 uint32_t mastervol = 0;
 uint32_t masteroct = 0;
+uint32_t othermasterstate = 0;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -339,7 +340,7 @@ void decodeTask(void *pvParameters)
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
     //testvar = RX_Message_local[1];
-
+    othermasterstate = RX_Message_local[3];
     if(knobCount1==0){//handling left slave
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
@@ -371,7 +372,10 @@ void CAN_TX_Task (void * pvParameters) {
     if(knobCount1 == 1){
       msgOut[1] = knobCount2;//sending octave
       msgOut[2] = knobCount3;//sending volume
-		  CAN_TX(0x123, msgOut);
+      msgOut[3] = 1;
+      if(othermasterstate==0){
+        CAN_TX(0x123, msgOut);
+      }
     }
 	}
 }
