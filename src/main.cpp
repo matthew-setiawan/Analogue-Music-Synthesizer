@@ -237,6 +237,61 @@ void readKnobs01(){
   prevKnob1 = knob1;
 }
 
+
+// TABLE_SIZE for the wavetable 
+#define TABLE_SIZE 256 // the size of the wave table array
+
+// wavetable is an array that holds lookup table
+u_int32_t waveTable[TABLE_SIZE];
+
+// Uses knobCount0 to select waveform from a wavetable
+void generateWaveTable(u_int32_t* waveTable){
+  // 0 = SAWTOOTH
+  // 1 = SINE
+  // 2 = TRIANGLE
+  // 3 = SQUARE
+  // 4 = SPECIAL MATHEMATICAL WAVEFORM
+
+  switch(knobCount0){
+    case 0: // SAWTOOTH
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        waveTable[i] = i;
+      }
+      break;
+    case 1: // SINE
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        waveTable[i] = sin(2*PI*i/TABLE_SIZE)*127 + 128;
+      }
+      break;
+    case 2: // TRIANGLE
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        if(i < TABLE_SIZE/2){ // left half of triangle
+          waveTable[i] = i*2;
+        }
+        else{                 // right half of triangle
+          waveTable[i] = (TABLE_SIZE - i)*2;
+        }
+      }
+      break;
+    case 3: // SQUARE
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        if(i < TABLE_SIZE/2){
+          waveTable[i] = 255;
+        }
+        else{
+          waveTable[i] = 0;
+        }
+      }
+      break;
+    case 4: // SPECIAL MATHEMATICAL WAVEFORM - sum of sines (can change later to a fourier series sum of sines/cosines)
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
+      }
+      break;
+  }
+}
+
+
 void sampleISR(){
   //SAWTOOTH
   /*
