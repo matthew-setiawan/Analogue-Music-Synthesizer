@@ -197,6 +197,10 @@ void readKnobs(){
   }
   prevKnob2 = knob2;
 
+  if(knobCount1 != 1){
+    knobCount3 = mastervol;
+    knobCount2 = masteroct;
+  }
 }
 
 long testvar = 0;
@@ -231,11 +235,6 @@ void readKnobs01(){
     knobCount1 += -1;
   }
   prevKnob1 = knob1;
-
-  if(knobCount1 != 1){
-    knobCount3 = mastervol;
-    knobCount2 = masteroct;
-  }
 }
 
 void sampleISR(){
