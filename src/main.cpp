@@ -13,6 +13,8 @@ using namespace std;
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
 
+uint32_t masterstate = 0;
+
 //sin array
 u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
 
@@ -41,7 +43,6 @@ SemaphoreHandle_t CAN_TX_Semaphore;
 //Recieved Volume
 uint32_t mastervol = 0;
 uint32_t masteroct = 0;
-uint32_t othermasterstate = 0;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -340,7 +341,6 @@ void decodeTask(void *pvParameters)
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
     //testvar = RX_Message_local[1];
-    othermasterstate = RX_Message_local[3];
     if(knobCount1==0){//handling left slave
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
@@ -373,7 +373,7 @@ void CAN_TX_Task (void * pvParameters) {
       msgOut[1] = knobCount2;//sending octave
       msgOut[2] = knobCount3;//sending volume
       msgOut[3] = 1;
-      if(othermasterstate==0){
+      if(masterstate==1){
         CAN_TX(0x123, msgOut);
       }
     }
