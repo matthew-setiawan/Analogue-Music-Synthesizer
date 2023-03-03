@@ -8,7 +8,9 @@
 #include <cmath>
 #include <ES_CAN.h>
 #include <ctime>
+
 using namespace std;
+
 
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
@@ -27,15 +29,11 @@ volatile uint32_t prevKnob2;
 
 volatile uint32_t knobCount1 = 1;
 volatile uint32_t prevKnob1;
-
-//Previous
-volatile uint32_t prevknobCount1;
-
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
 
 //Key String/Array
-volatile uint32_t keyVal;
+volatile uint32_t keyVal = 4095;
 
 //Constants
 const long pibitshift16 = 205887; // define the value of pi
@@ -235,11 +233,9 @@ void readKnobs01(){
   prevKnob0 = knob0;
 
   if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<3){
-    prevknobCount1 = knobCount1;
     knobCount1 += 1;
   }
   else if(((knob1==0 && prevKnob1==1)||(knob1==3 && prevKnob1==2))&&knobCount1>0){
-    prevknobCount1 = knobCount1;
     knobCount1 += -1;
   }
   prevKnob1 = knob1;
@@ -257,15 +253,25 @@ void sampleISR(){
   //SIN WAVE
   static uint32_t clocktick = 0;
   uint32_t Vout;
-  u_int32_t index = ((((currentStepSize<<2)>>knobCount2)*clocktick)>>22)%360;
-  if(index>=180){
-    Vout = -sinarr[(index-180)>>1];
+  uint32_t zeroCount = 0;
+  uint32_t Vfinal = 0;
+  int tempkeyVal = keyVal;
+  for(int i=11;i>=0;i--){
+    if(tempkeyVal%2==0){
+      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
+      if(index>=180){
+        Vfinal += -sinarr[(index-180)>>1];
+      }
+      else{
+        Vfinal += sinarr[(index)>>1];
+      }
+      zeroCount += 1;
+    }
+    tempkeyVal = tempkeyVal/2;
   }
-  else{
-    Vout = sinarr[(index)>>1];
-  }
-  testvar = clocktick;
-  analogWrite(OUTR_PIN, ((Vout+128)>>1)>>knobCount3);
+  testvar = zeroCount;
+  uint32_t Vres = Vfinal>>zeroCount;
+  analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
   clocktick +=1;
 }
 
@@ -334,7 +340,6 @@ void displayUpdateTask(void * pvParameters){
     cout << knobCount2 << endl;
     cout << knobCount1 << endl;
     cout << knobCount0 << endl;
-
   }
 }
 
@@ -370,19 +375,6 @@ void CAN_RX_ISR (void) {
 	xQueueSendFromISR(msgInQ, RX_Message_ISR, NULL);
 }
 
-void CAN_TX_ISR (void) {
-	xSemaphoreGiveFromISR(CAN_TX_Semaphore, NULL);
-}
-
-void INIT_CAN(){
-  //Initialise CAN Communication
-  CAN_Init(false);
-  setCANFilter(0x123,0x7ff);
-  CAN_RegisterTX_ISR(CAN_TX_ISR);
-  CAN_RegisterRX_ISR(CAN_RX_ISR);
-  CAN_Start();
-}
-
 void CAN_TX_Task (void * pvParameters) {
 	uint8_t msgOut[8] = {0};
 	while (1) {
@@ -395,11 +387,12 @@ void CAN_TX_Task (void * pvParameters) {
       if(masterstate==1){
         CAN_TX(0x123, msgOut);
       }
-      if(prevknobCount1!=knobCount1){
-        INIT_CAN();
-      }
     }
 	}
+}
+
+void CAN_TX_ISR (void) {
+	xSemaphoreGiveFromISR(CAN_TX_Semaphore, NULL);
 }
 
 void setup() {
@@ -437,7 +430,11 @@ void setup() {
   Serial.println("Hello World");
 
   //Initialise CAN Communication
-  INIT_CAN();
+  CAN_Init(false);
+  setCANFilter(0x123,0x7ff);
+  CAN_RegisterTX_ISR(CAN_TX_ISR);
+  CAN_RegisterRX_ISR(CAN_RX_ISR);
+  CAN_Start();
 
   //Interrupt for sampleISR()
   TIM_TypeDef *Instance = TIM1;
