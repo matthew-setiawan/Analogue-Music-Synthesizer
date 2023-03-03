@@ -13,7 +13,7 @@ using namespace std;
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
 
-uint32_t masterstate = 0;
+uint32_t masterstate = 1;
 
 //sin array
 u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
@@ -27,6 +27,10 @@ volatile uint32_t prevKnob2;
 
 volatile uint32_t knobCount1 = 1;
 volatile uint32_t prevKnob1;
+
+//Previous
+volatile uint32_t prevknobCount1;
+
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
 
@@ -231,9 +235,11 @@ void readKnobs01(){
   prevKnob0 = knob0;
 
   if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<3){
+    prevknobCount1 = knobCount1;
     knobCount1 += 1;
   }
   else if(((knob1==0 && prevKnob1==1)||(knob1==3 && prevKnob1==2))&&knobCount1>0){
+    prevknobCount1 = knobCount1;
     knobCount1 += -1;
   }
   prevKnob1 = knob1;
@@ -364,6 +370,19 @@ void CAN_RX_ISR (void) {
 	xQueueSendFromISR(msgInQ, RX_Message_ISR, NULL);
 }
 
+void CAN_TX_ISR (void) {
+	xSemaphoreGiveFromISR(CAN_TX_Semaphore, NULL);
+}
+
+void INIT_CAN(){
+  //Initialise CAN Communication
+  CAN_Init(false);
+  setCANFilter(0x123,0x7ff);
+  CAN_RegisterTX_ISR(CAN_TX_ISR);
+  CAN_RegisterRX_ISR(CAN_RX_ISR);
+  CAN_Start();
+}
+
 void CAN_TX_Task (void * pvParameters) {
 	uint8_t msgOut[8] = {0};
 	while (1) {
@@ -376,12 +395,11 @@ void CAN_TX_Task (void * pvParameters) {
       if(masterstate==1){
         CAN_TX(0x123, msgOut);
       }
+      if(prevknobCount1!=knobCount1){
+        INIT_CAN();
+      }
     }
 	}
-}
-
-void CAN_TX_ISR (void) {
-	xSemaphoreGiveFromISR(CAN_TX_Semaphore, NULL);
 }
 
 void setup() {
@@ -419,11 +437,7 @@ void setup() {
   Serial.println("Hello World");
 
   //Initialise CAN Communication
-  CAN_Init(false);
-  setCANFilter(0x123,0x7ff);
-  CAN_RegisterTX_ISR(CAN_TX_ISR);
-  CAN_RegisterRX_ISR(CAN_RX_ISR);
-  CAN_Start();
+  INIT_CAN();
 
   //Interrupt for sampleISR()
   TIM_TypeDef *Instance = TIM1;
