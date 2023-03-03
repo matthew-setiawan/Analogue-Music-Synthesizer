@@ -307,10 +307,10 @@ void displayUpdateTask(void * pvParameters){
       state = "master";
     }
     else if(knobCount1 == 2){
-      state = "slave left";
+      state = "slave right";
     }
     else{
-      state = "slave right";
+      state = "slave left";
     }
     u8g2.drawStr(2,10,state.c_str());
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
