@@ -27,8 +27,8 @@ volatile uint32_t knobCount1 = 1;
 volatile uint32_t prevKnob1;
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
+volatile string keypressed;
 
-volatile uint32_t intToBinaryString; // added by Omar
 
 //Key String/Array
 volatile uint32_t keyVal;
@@ -44,20 +44,6 @@ SemaphoreHandle_t CAN_TX_Semaphore;
 uint32_t mastervol = 0;
 uint32_t masteroct = 0;
 
-//Key/Val Mapping
-// std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
-//                                                 {"011111111111",1},
-//                                                 {"101111111111",2},
-//                                                 {"110111111111",3},
-//                                                 {"111011111111",4},
-//                                                 {"111101111111",5},
-//                                                 {"111110111111",6},
-//                                                 {"111111011111",7},
-//                                                 {"111111101111",8},
-//                                                 {"111111110111",9},
-//                                                 {"111111111011",10},
-//                                                 {"111111111101",11},
-//                                                 {"111111111110",12}};
 
 const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68178701,72231589,76528508,81077269,85899346,91006452,96418111};
 const uint32_t rawstepSizes [] = {0,262,277,294,311,329,349,369,392,415,440,466,494};
@@ -293,7 +279,6 @@ void generateWaveTable(u_int32_t* waveTable){
   }
 }
 
-volatile string keypressed;
 
 
 void sampleISR(){
