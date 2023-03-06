@@ -8,14 +8,12 @@
 #include <cmath>
 #include <ES_CAN.h>
 #include <ctime>
-
 using namespace std;
-
 
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
 
-uint32_t masterstate = 1;
+uint32_t masterstate = 0;
 
 //sin array
 u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
@@ -27,13 +25,21 @@ volatile uint32_t prevKnob3;
 volatile uint32_t knobCount2;
 volatile uint32_t prevKnob2;
 
+//variables denoting knob counts. 
 volatile uint32_t knobCount1 = 1;
+volatile int32_t jst_knobCount0 = 0;
+volatile int32_t jst_knobCount1 = 0;
+volatile int32_t js_state = 0;
+
 volatile uint32_t prevKnob1;
+volatile uint32_t prevKnobj1;
+volatile uint32_t prevKnobj0 = 0;
+volatile uint32_t prevKnobupj0 = 0;
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
 
 //Key String/Array
-volatile uint32_t keyVal = 4095;
+volatile uint32_t keyVal;
 
 //Constants
 const long pibitshift16 = 205887; // define the value of pi
@@ -179,8 +185,8 @@ void readKnobs(){
   digitalWrite(REN_PIN, HIGH);
   delayMicroseconds(3);
   //GET KNOB2 
-  knob2 += 2*digitalRead(C2_PIN);
-  knob2 += 1*digitalRead(C3_PIN);
+  knob2 += 2*digitalRead(C3_PIN);
+  knob2 += 1*digitalRead(C2_PIN);
   //GET KNOB3
   knob3 += 2*digitalRead(C0_PIN);
   knob3 += 1*digitalRead(C1_PIN);
@@ -206,6 +212,61 @@ void readKnobs(){
     knobCount2 = masteroct;
   }
 }
+void rjoystickknob(){
+
+  // uint32_t jst_knob1 = 0;
+  uint32_t jst_knob0 = 0;
+  // uint32_t test_add = 0;
+  delayMicroseconds(1);
+
+  digitalWrite(RA0_PIN, HIGH);
+  digitalWrite(RA1_PIN, LOW);
+  digitalWrite(RA2_PIN, HIGH);
+  digitalWrite(REN_PIN, HIGH);
+  delayMicroseconds(3);
+  //GET KNOB0
+  jst_knob0 += 2*digitalRead(C3_PIN);
+  jst_knob0 += 1*digitalRead(JOYX_PIN);
+  delayMicroseconds(1);
+  // jst_knob0 -= 1*digitalRead(JOYY_PIN);
+  //GET KNOB1
+
+  //keeping a knobcount parameter to be within a certtain overall bound 
+  if(((jst_knob0==1 && prevKnobj0==0))||(jst_knob0==2 && prevKnobj0==3)&&jst_knobCount0<6){
+    jst_knobCount0 += 1;
+  }
+  
+
+  prevKnobj0 = jst_knob0;
+}
+void detectupjoystick(){
+
+  // uint32_t jst_knob1 = 0;
+  uint32_t upjoystick = 0;
+  // uint32_t test_add = 0;
+  delayMicroseconds(2);
+
+  // digitalWrite(RA0_PIN, HIGH);
+  // digitalWrite(RA1_PIN, LOW);
+  // digitalWrite(RA2_PIN, HIGH);
+  // digitalWrite(REN_PIN, HIGH);
+  // delayMicroseconds(3);
+  //GET KNOB0
+  upjoystick += 2*digitalRead(C3_PIN);
+  upjoystick += 1*digitalRead(JOYY_PIN);
+  delayMicroseconds(1);
+  // jst_knob0 -= 1*digitalRead(JOYY_PIN);
+  //GET KNOB1
+
+  //keeping a knobcount parameter to be within a certtain overall bound 
+  if(((upjoystick==1 && prevKnobupj0==0))||(upjoystick==2 && prevKnobupj0==3)&&jst_knobCount0>0){
+    jst_knobCount0 -= 1;
+  }
+  
+
+  prevKnobupj0 = upjoystick;
+}
+
 
 long testvar = 0;
 
@@ -240,6 +301,8 @@ void readKnobs01(){
   }
   prevKnob1 = knob1;
 }
+//reads the joystick values. 
+
 
 void sampleISR(){
   //SAWTOOTH
@@ -253,34 +316,15 @@ void sampleISR(){
   //SIN WAVE
   static uint32_t clocktick = 0;
   uint32_t Vout;
-  uint32_t zeroCount = 0;
-  uint32_t Vfinal = 0;
-  int tempkeyVal = keyVal;
-  for(int i=11;i>=0;i--){
-    if(tempkeyVal%2==0){
-      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
-      if(index>=180){
-        Vfinal += -sinarr[(index-180)>>1];
-      }
-      else{
-        Vfinal += sinarr[(index)>>1];
-      }
-      zeroCount += 1;
-    }
-    tempkeyVal = tempkeyVal/2;
+  u_int32_t index = ((((currentStepSize<<2)>>knobCount2)*clocktick)>>22)%360;
+  if(index>=180){
+    Vout = -sinarr[(index-180)>>1];
   }
-  testvar = zeroCount;
-  if(zeroCount < 3){
-
+  else{
+    Vout = sinarr[(index)>>1];
   }
-  else if(zeroCount < 9){
-    zeroCount = 3;
-  }
-  else if(zeroCount < 12){
-    zeroCount = 4;
-  }
-  uint32_t Vres = Vfinal>>zeroCount;
-  analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
+  testvar = clocktick;
+  analogWrite(OUTR_PIN, ((Vout+128)>>1)>>knobCount3);
   clocktick +=1;
 }
 
@@ -293,6 +337,9 @@ void scanKeysTask(void * pvParameters) {
     keyVal = readCols();
     readKnobs();
     readKnobs01();
+    rjoystickknob();
+    detectupjoystick();
+    
     xSemaphoreGive(keyArrayMutex);
     if(readCols()==4095){
         currentStepSize = stepSizes[0];
@@ -344,11 +391,16 @@ void displayUpdateTask(void * pvParameters){
     //Toggle LED
     cout << intToBinaryString(readCols()) << endl;
     digitalToggle(LED_BUILTIN);
-    cout << testvar << endl;
+    // cout << testvar << endl;
     cout << knobCount3 << endl;
-    cout << knobCount2 << endl;
-    cout << knobCount1 << endl;
+    // cout << "DENOTING KNOBS2:"<<knobCount2 << endl;
+    cout << "DENOTING KNOBS:"<<knobCount1 << endl;
+    cout<<"DENOTING JOYSTICK:"<<jst_knobCount0<<endl;
+    cout<<"DENOTING JS STATE"<<js_state<<endl;
+
+
     cout << knobCount0 << endl;
+
   }
 }
 
