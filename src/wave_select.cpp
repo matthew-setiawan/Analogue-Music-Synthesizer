@@ -281,10 +281,6 @@ void readKnobs01(){
 }
 
 
-
-
-
-
 // Uses knobCount0 to select waveform from a wavetable
 void generateWaveTable(){
   // 0 = SAWTOOTH
@@ -294,45 +290,51 @@ void generateWaveTable(){
   // 4 = SPECIAL MATHEMATICAL WAVEFORM
   switch(knobCount0){
     case 0: // SAWTOOTH
-      for(size_t i = 0; i < TABLE_SIZE; i++){
+        testvar = 0;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
         waveTable[i] = i;
-      }
-      break;
+        }
+        break;
     case 1: // SINE
-      for(size_t i = 0; i < TABLE_SIZE; i++){
-        waveTable[i] = sin(2*PI*i/TABLE_SIZE)*127 + 128;
-      }
-      break;
+        testvar = 1;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
+            waveTable[i] = sin(2*PI*i/TABLE_SIZE)*127 + 128;
+        }
+        break;
     case 2: // TRIANGLE
-      for(size_t i = 0; i < TABLE_SIZE; i++){
-        if(i < TABLE_SIZE/2){ // left half of triangle
-          waveTable[i] = i*2;
+        testvar = 2;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
+            if(i < TABLE_SIZE/2){ // left half of triangle
+            waveTable[i] = i*2;
+            }
+            else{                 // right half of triangle
+            waveTable[i] = (TABLE_SIZE - i)*2;
+            }
         }
-        else{                 // right half of triangle
-          waveTable[i] = (TABLE_SIZE - i)*2;
-        }
-      }
-      break;
+        break;
     case 3: // SQUARE
-      for(size_t i = 0; i < TABLE_SIZE; i++){
-        if(i < TABLE_SIZE/2){
-          waveTable[i] = 255;
+        testvar = 3;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
+            if(i < TABLE_SIZE/2){
+            waveTable[i] = 255;
+            }
+            else{
+            waveTable[i] = 0;
+            }
         }
-        else{
-          waveTable[i] = 0;
-        }
-      }
-      break;
+        break;
     case 4: // SPECIAL MATHEMATICAL WAVEFORM - sum of sines (can change later to a fourier series sum of sines/cosines)
-      for(size_t i = 0; i < TABLE_SIZE; i++){
-        waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
-      }
-      break;
+        testvar = 4;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
+            waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
+        }
+        break;
     case 5: // SPECIAL MATHEMATICAL WAVEFORM - sum of sines (can change later to a fourier series sum of sines/cosines)
-      for(size_t i = 0; i < TABLE_SIZE; i++){
-        waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
-      }
-      break;
+        testvar = 5;
+        for(size_t i = 0; i < TABLE_SIZE; i++){
+            waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
+        }
+        break;
   }
 }
 
@@ -365,7 +367,7 @@ void sampleISR(){
     }
     tempkeyVal = tempkeyVal/2;
   }
-  testvar = zeroCount;
+//   testvar = zeroCount;
   if(zeroCount < 3){
 
   }
@@ -432,6 +434,7 @@ void displayUpdateTask(void * pvParameters){
     u8g2.drawStr(2,10,state.c_str());
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
     u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
+    u8g2.drawStr(5,10,("WAVEFORM: "+to_string(knobCount0)).c_str());
     xSemaphoreGive(keyArrayMutex);
     //currentStepSize = keystepmap[readCols()];
     u8g2.setCursor(2,20);
