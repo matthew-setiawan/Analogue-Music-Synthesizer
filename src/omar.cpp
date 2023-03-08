@@ -239,7 +239,6 @@ void generateWaveTable(u_int32_t* waveTable){
   // 2 = TRIANGLE
   // 3 = SQUARE
   // 4 = SPECIAL MATHEMATICAL WAVEFORM
-
   switch(knobCount0){
     case 0: // SAWTOOTH
       for(size_t i = 0; i < TABLE_SIZE; i++){
@@ -276,9 +275,13 @@ void generateWaveTable(u_int32_t* waveTable){
         waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
       }
       break;
+    case 5: // SPECIAL MATHEMATICAL WAVEFORM - sum of sines (can change later to a fourier series sum of sines/cosines)
+      for(size_t i = 0; i < TABLE_SIZE; i++){
+        waveTable[i] = (sin(2*PI*i/TABLE_SIZE)*127 + 128) + (sin(4*PI*i/TABLE_SIZE)*127 + 128);
+      }
+      break;
   }
 }
-
 
 
 void sampleISR(){
