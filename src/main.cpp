@@ -24,13 +24,19 @@ u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60,
 volatile uint32_t currentStepSize;
 volatile uint32_t knobCount3;
 volatile uint32_t prevKnob3;
-volatile uint32_t knobCount2;
+volatile uint32_t knobCount2 = 2;
 volatile uint32_t prevKnob2;
 
-volatile uint32_t knobCount1 = 1;
+volatile uint32_t knobCount1 = 0;
 volatile uint32_t prevKnob1;
 volatile uint32_t knobCount0;
 volatile uint32_t prevKnob0;
+
+volatile int32_t jst_knobCount0 = 0;
+volatile int32_t jst_knobCount1 = 0;
+volatile int32_t js_state = 0;
+volatile uint32_t prevKnobj1;
+volatile uint32_t prevKnobj0;
 
 //Key String/Array
 volatile uint32_t keyVal = 4095;
@@ -44,7 +50,7 @@ SemaphoreHandle_t CAN_TX_Semaphore;
 
 //Recieved Volume
 uint32_t mastervol = 0;
-uint32_t masteroct = 0;
+uint32_t masteroct = 2;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -201,13 +207,40 @@ void readKnobs(){
   }
   prevKnob2 = knob2;
 
-  if(knobCount1 != 1){
+  if(knobCount1 != 2){
     knobCount3 = mastervol;
     knobCount2 = masteroct;
   }
 }
 
 long testvar = 0;
+
+void rjoystickknob(){
+  uint32_t jst_knob1 = 0;
+  uint32_t jst_knob0 = 0;
+  uint32_t test_add = 0;
+  delayMicroseconds(1);
+  digitalWrite(RA0_PIN, HIGH);
+  digitalWrite(RA1_PIN, LOW);
+  digitalWrite(RA2_PIN, HIGH);
+  digitalWrite(REN_PIN, HIGH);
+  delayMicroseconds(3);
+  //GET KNOB0  jst_knob0 += 2*digitalRead(C3_PIN);
+  jst_knob0 += 1*digitalRead(JOYX_PIN);
+  delayMicroseconds(1);
+  // jst_knob0 -= 1*digitalRead(JOYY_PIN);  //GET KNOB1  jst_knob1 += 2*digitalRead(C1_PIN);
+  jst_knob1 += 1*digitalRead(JOYY_PIN);
+  if(((jst_knob0==1 && prevKnobj0==0)||(jst_knob0==2 && prevKnobj0==3))&&jst_knobCount0<6){
+    jst_knobCount0 += 1;
+    js_state += 1;
+  }
+  prevKnobj0 = jst_knob0;
+  if(((jst_knob1==1 && prevKnobj1==0)||(jst_knob1==2 && prevKnobj1==3))&&prevKnobj1<6){
+    jst_knobCount1 -= 1;
+    js_state -= 1;
+  }
+  prevKnobj1 = jst_knob1;
+}
 
 void readKnobs01(){
   uint32_t knob1 = 0;
@@ -279,7 +312,7 @@ void sampleISR(){
   else if(zeroCount < 12){
     zeroCount = 4;
   }
-  uint32_t Vres = Vfinal>>zeroCount;
+  uint32_t Vres = Vfinal>>zeroCount-1;
   analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
   clocktick +=1;
 }
@@ -324,14 +357,14 @@ void displayUpdateTask(void * pvParameters){
     //u8g2.drawStr(2,10,"Helllo World!");  // write something to the internal memory
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
     string state;
-    if(knobCount1 == 1){
+    if(knobCount1 == 2){
       state = "master";
     }
-    else if(knobCount1 == 2){
-      state = "slave right";
+    else if(knobCount1 == 1){
+      state = "slave left";
     }
     else{
-      state = "slave left";
+      state = "slave right";
     }
     u8g2.drawStr(2,10,state.c_str());
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
@@ -361,11 +394,11 @@ void decodeTask(void *pvParameters)
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
     //testvar = RX_Message_local[1];
-    if(knobCount1==0){//handling left slave
+    if(knobCount1==1){//handling left slave
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
     }
-    else if(knobCount1==2){//handling left slave
+    else if(knobCount1==0){//handling right slave
       mastervol = RX_Message_local[2];
       if(RX_Message_local[1]==0){
         masteroct = 0;
