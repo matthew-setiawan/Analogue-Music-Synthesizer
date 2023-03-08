@@ -109,6 +109,7 @@ uint32_t CAN_TX(uint32_t ID, uint8_t data[8]) {
 
   //Wait for free mailbox
   while (!HAL_CAN_GetTxMailboxesFreeLevel(&CAN_Handle));
+  // HAL_CAN_GetTxMailboxesFreeLevel(&CAN_Handle);//ignoring the result of the free mailbox to observe timing
 
   //Start the transmission
   return (uint32_t) HAL_CAN_AddTxMessage(&CAN_Handle, &txHeader, data, NULL);

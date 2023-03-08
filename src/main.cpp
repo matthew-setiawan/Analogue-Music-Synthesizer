@@ -22,15 +22,15 @@ u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60,
 
 //Step Size
 volatile uint32_t currentStepSize;
-volatile uint32_t knobCount3;
+volatile uint32_t knobCount3 = 0;
 volatile uint32_t prevKnob3;
-volatile uint32_t knobCount2;
+volatile uint32_t knobCount2 = 0;
 volatile uint32_t prevKnob2;
 
 
 volatile uint32_t knobCount1 = 1;
 volatile uint32_t prevKnob1;
-volatile uint32_t knobCount0;
+volatile uint32_t knobCount0 = 0;
 volatile uint32_t prevKnob0;
 volatile uint32_t prevKnobj0 = 0;
 volatile uint32_t prevKnobupj0 = 0;
@@ -46,7 +46,7 @@ const long pibitshift16 = 205887; // define the value of pi
 const long incrbitshift16 = 3;
 
 SemaphoreHandle_t keyArrayMutex;
-SemaphoreHandle_t CAN_TX_Semaphore;
+SemaphoreHandle_t CAN_TX_Semaphore;//for testing purposes. 
 
 //Recieved Volume
 uint32_t mastervol = 0;
@@ -305,19 +305,22 @@ void readKnobs01(){
 
 void sampleISR(){
   //SAWTOOTH
-  /*
+
   static uint32_t phaseAcc = 0;
   phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
   uint32_t Vout = (phaseAcc>>24) - 128;
   testvar = Vout;
   analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
-  */
+
   //SIN WAVE
+    /*
   static uint32_t clocktick = 0;
   uint32_t Vout;
   uint32_t zeroCount = 0;
   uint32_t Vfinal = 0;
-  int tempkeyVal = keyVal;
+  // int tempkeyVal = keyVal;
+  int tempkeyVal = 4094;
+
   for(int i=11;i>=0;i--){
     if(tempkeyVal%2==0){
       u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
@@ -332,10 +335,7 @@ void sampleISR(){
     tempkeyVal = tempkeyVal/2;
   }
   testvar = zeroCount;
-  if(zeroCount < 3){
-
-  }
-  else if(zeroCount < 9){
+  if(zeroCount < 9){
     zeroCount = 3;
   }
   else if(zeroCount < 12){
@@ -344,6 +344,7 @@ void sampleISR(){
   uint32_t Vres = Vfinal>>zeroCount;
   analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
   clocktick +=1;
+  */
 }
 
 void scanKeysTask(void * pvParameters) {
@@ -447,7 +448,7 @@ void CAN_TX_Task (void * pvParameters) {
     msgOut[1] = knobCount2;//sending octave
     msgOut[2] = knobCount3;//sending volume
     msgOut[3] = 1;
-    if(masterstate==1){
+    if(true){
       CAN_TX(0x123, msgOut);
     }
     }
@@ -460,7 +461,7 @@ void CAN_TX_ISR (void) {
 }
 
 void test_exe_time(){
-    #ifndef TEST_SCANKEYS
+  #ifndef TEST_SCANKEYS
     uint32_t startTime = micros();
 
     for (int iter = 0; iter < 32; iter++) {
@@ -468,7 +469,7 @@ void test_exe_time(){
     }
 
     Serial.println(micros()-startTime);
-    Serial.print("KEY SCAN");
+    Serial.println("KEY SCAN");
     // while(1);
 
   #endif
@@ -485,34 +486,102 @@ void test_exe_time(){
   //   while(1);
 
   // #endif
-  #ifndef TEST_DECODE
-    // Send the item to the queue
-    uint8_t test_isr[8];    
-    test_isr[1] = 'P';
-    test_isr[2] = 'Q';
-    Serial.println("enter decode");
+  // #ifndef TEST_DECODE
+  //   // Send the item to the queue
+  //   uint8_t test_isr[8];    
+  //   test_isr[1] = 'P';
+  //   test_isr[2] = 'Q';
+  //   Serial.println("enter decode");
 
 
-    for (int iter = 0; iter < 32; iter++) {
+  //   for (int iter = 0; iter < 32; iter++) {
 
-      xQueueSend(msgInQ, test_isr, portMAX_DELAY);
+  //     xQueueSend(msgInQ, test_isr, portMAX_DELAY);//put values in queue so there is something to be retrieved. 
 
-      // decodeTask(NULL);//506441
+  //     // decodeTask(NULL);//506441
+  //   }
+  //   uint32_t first_time = micros();
+
+  //   for (int iter = 0; iter < 32; iter++) {
+
+  //     decodeTask(NULL);//506441
+  //   }
+
+
+  //   Serial.println(micros()-first_time);
+  //   Serial.println("RECORD DECODE TIME TIME");
+  //   #endif
+
+
+  #ifndef TEST_CAN 
+    Serial.println("CAN testing");
+
+    uint32_t can_time = micros();
+    for (int num = 0; num < 32; num++) {
+
+      CAN_TX_Task(NULL);
     }
-    uint32_t first_time = micros();
-
-    for (int iter = 0; iter < 32; iter++) {
-
-      decodeTask(NULL);//506441
-    }
-
-
-    Serial.println(micros()-first_time);
-    Serial.print("RECORD TIME");
-    while(1);
+    Serial.println(micros()-can_time);
+    Serial.println("Time for CAN");
 
   #endif
 
+}
+
+void test_isr_funcs(){
+  // #ifndef TEST_SAMPLE_ISR
+  // Serial.println("timing can");
+  // uint32_t test_cantx = micros();
+  // for (int i= 0; i<32;i++){
+  //     Serial.println("a");
+  //     CAN_TX_ISR();
+
+  // }
+  // Serial.println(micros()-test_cantx);
+  // Serial.println("DEDUCED CAN TX ISR TIME");
+  // #endif
+
+  #ifndef TEST_TX_ISR
+  uint32_t test_can_tx = micros();
+  Serial.println("timing can");
+
+  for (int i= 0; i<32;i++){
+    CAN_RegisterTX_ISR(CAN_TX_ISR);// Disabling (uint32_t) HAL_CAN_ActivateNotification (&CAN_Handle, CAN_IT_TX_MAILBOX_EMPTY);
+
+
+  }
+  Serial.println(micros()-test_can_tx);
+  Serial.println("DEDUCED CAN TX ISR TIME");
+  #endif
+
+  #ifndef TEST_RX_ISR
+
+    Serial.println("timing can RX");
+    uint32_t test_can = micros();
+
+    for (int i= 0; i<32;i++){
+      CAN_RegisterRX_ISR(CAN_RX_ISR);
+
+    }
+    Serial.println(micros()-test_can);
+    Serial.println("DEDUCED CAN RX ISR TIME");
+
+  #endif
+
+  #ifndef TEST_SAMPLE_ISR
+
+    Serial.println("Testing Sample Rate ISR");
+    uint32_t test_isr = micros();
+
+    //Take the time required for sampleISR() using for-loop. 
+    for (int i=0;i<32;i++){
+      sampleISR();
+    }
+
+    Serial.println(micros()-test_isr);
+    Serial.println("Ending Test Sample Rate ISR");
+    
+  #endif
 
 
 }
@@ -554,12 +623,17 @@ void setup() {
   //Initialise CAN Communication
   // disables can communication threads to enable timing. 
   #ifndef DISABLE_CAN
-  CAN_Init(false);
+  CAN_Init(true);
   setCANFilter(0x123,0x7ff);
+
   CAN_RegisterTX_ISR(CAN_TX_ISR);
+  // #ifndef DISABLE_CAN
+
   CAN_RegisterRX_ISR(CAN_RX_ISR);
+
   CAN_Start();
   #endif
+
 
   //Interrupt for sampleISR()
   #ifndef DISABLE_TIMER
@@ -612,10 +686,11 @@ void setup() {
   //Knobs
   keyArrayMutex = xSemaphoreCreateMutex();
 
-  test_exe_time();
+  // test_exe_time();
+  test_isr_funcs();
 
 
-  vTaskStartScheduler();
+  // vTaskStartScheduler();
 }
 
 void loop() {
