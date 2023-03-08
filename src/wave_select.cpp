@@ -348,7 +348,7 @@ void sampleISR(){
   testvar = Vout;
   analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
   */
-  generateWaveTable();
+//   generateWaveTable();
   static uint32_t clocktick = 0;
   uint32_t Vout;
   uint32_t zeroCount = 0;
