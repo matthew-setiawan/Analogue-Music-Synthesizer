@@ -21,11 +21,10 @@ uint32_t masterstate = 1;
 // u_int32_t sinarr[90] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
 
 // TABLE_SIZE for the wavetable 
-#define TABLE_SIZE 90 // the size of the wave table array
+#define TABLE_SIZE 256 // the size of the wave table array
 
 // wavetable is an array that holds lookup table
-u_int32_t waveTable[TABLE_SIZE] = {0, 4, 8, 13, 17, 22, 26, 30, 35, 39, 43, 47, 52, 56, 60, 63, 67, 71, 75, 78, 82, 85, 88, 92, 95, 98, 100, 103, 106, 108, 110, 113, 115, 116, 118, 120, 121, 123, 124, 125, 126, 126, 127, 127, 127, 128, 127, 127, 127, 126, 126, 125, 124, 123, 121, 120, 118, 116, 115, 113, 110, 108, 106, 103, 100, 98, 95, 92, 88, 85, 82, 78, 75, 71, 67, 63, 60, 56, 52, 47, 43, 39, 35, 30, 26, 22, 17, 13, 8, 4};
-
+u_int32_t waveTable[TABLE_SIZE];
 //Step Size
 volatile uint32_t currentStepSize;
 volatile uint32_t knobCount3;
@@ -354,16 +353,17 @@ void sampleISR(){
   uint32_t zeroCount = 0;
   uint32_t Vfinal = 0;
   int tempkeyVal = keyVal;
-  for(int i=11;i>=0;i--){
+  for(int i=0; i<256; i++){
     if(tempkeyVal%2==0){
-      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
-      if(index>=180){
-        Vfinal += -waveTable[(index-180)>>1];
-      }
-      else{
-        Vfinal += waveTable[(index)>>1];
-      }
-      zeroCount += 1;
+    // //   u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
+    // //   if(index>=180){
+    // //     Vfinal += -waveTable[(index-180)>>1];
+    // //   }
+    // //   else{
+    //     Vfinal += waveTable[(index)>>1];
+    //   }
+        Vfinal += waveTable[i];
+        zeroCount += 1;
     }
     tempkeyVal = tempkeyVal/2;
   }
@@ -381,6 +381,7 @@ void sampleISR(){
   analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
   clocktick +=1;
 }
+
 
 void scanKeysTask(void * pvParameters) {
   const TickType_t xFrequency = 50/portTICK_PERIOD_MS;
