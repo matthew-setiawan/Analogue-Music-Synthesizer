@@ -331,6 +331,8 @@ void displayUpdateTask(void * pvParameters){
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
     u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
     xSemaphoreGive(keyArrayMutex);
+
+    
     //currentStepSize = keystepmap[readCols()];
     u8g2.setCursor(2,20);
     //u8g2.print(count++);
