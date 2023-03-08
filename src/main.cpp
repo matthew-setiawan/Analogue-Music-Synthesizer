@@ -6,8 +6,10 @@
 #include <bitset>
 #include <STM32FreeRTOS.h>
 #include <cmath>
+
 #include <ES_CAN.h>
 #include <ctime>
+
 
 using namespace std;
 
@@ -327,14 +329,14 @@ void scanKeysTask(void * pvParameters) {
     readKnobs();
     readKnobs01();
     xSemaphoreGive(keyArrayMutex);
-    if(readCols()==4095){
+    if(keyVal==4095){
         currentStepSize = stepSizes[0];
     }
     else{
       int indexs[12];
       int playedcount = 0;
       for(int i = 0; i < 12; i++){
-        if(intToBinaryString(readCols())[i]=='0'){
+        if(intToBinaryString(keyVal)[i]=='0'){
           indexs[playedcount] = stepSizes[i+1];
           playedcount += 1;
         }
@@ -375,13 +377,13 @@ void displayUpdateTask(void * pvParameters){
     //u8g2.print(count++);
     u8g2.sendBuffer();          // transfer internal memory to the display
     //Toggle LED
-    cout << intToBinaryString(readCols()) << endl;
+    // cout << intToBinaryString(readCols()) << endl;
     digitalToggle(LED_BUILTIN);
-    cout << testvar << endl;
-    cout << knobCount3 << endl;
-    cout << knobCount2 << endl;
-    cout << knobCount1 << endl;
-    cout << knobCount0 << endl;
+    // cout << testvar << endl;
+    // cout << knobCount3 << endl;
+    // cout << knobCount2 << endl;
+    // cout << knobCount1 << endl;
+    // cout << knobCount0 << endl;
   }
 }
 
@@ -416,6 +418,19 @@ void CAN_RX_ISR (void) {
 	CAN_RX(ID, RX_Message_ISR);
 	xQueueSendFromISR(msgInQ, RX_Message_ISR, NULL);
 }
+
+void timeTask (void * pvParameters) {
+  const TickType_t xFrequency = 50/portTICK_PERIOD_MS;
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+
+  while (1){
+
+    char statsBuffer[1024];
+    vTaskGetRunTimeStats(statsBuffer);
+    Serial.println(statsBuffer);
+  }
+}
+
 
 void CAN_TX_Task (void * pvParameters) {
 	uint8_t msgOut[8] = {0};
@@ -491,7 +506,7 @@ void setup() {
   "scanKeys",		/* Text name for the task */
   64,      		/* Stack size in words, not bytes */
   NULL,			/* Parameter passed into the task */
-  1,			/* Task priority */
+  4,			/* Task priority */
   &scanKeysHandle);
 
   TaskHandle_t displayUpdateHandle = NULL;
@@ -500,7 +515,7 @@ void setup() {
   "displayUpdate",       /* Text name for the task */
   256,                   /* Stack size in words, not bytes */
   NULL,                  /* Parameter passed into the task */
-  1,                     /* Task priority */
+  2,                     /* Task priority */
   &displayUpdateHandle);
 
   TaskHandle_t CAN_TX_Handle = NULL;
@@ -508,7 +523,7 @@ void setup() {
   "CAN_TX",    /* Text name for the task */
   32,          /* Stack size in words, not bytes */
   NULL,        /* Parameter passed into the task */
-  1,           /* Task priority */
+  3,           /* Task priority */
   &CAN_TX_Handle);
 
   TaskHandle_t decodeHandle = NULL;
@@ -517,8 +532,17 @@ void setup() {
   "decodeTask", /* Text name for the task */
   32,           /* Stack size in words, not bytes */
   NULL,         /* Parameter passed into the task */
-  1,            /* Task priority */
+  3,            /* Task priority */
   &decodeHandle);
+
+  TaskHandle_t timingHandle = NULL;
+  xTaskCreate(
+  timeTask,   /* Function that implements the task */
+  "timeTask", /* Text name for the task */
+  32,           /* Stack size in words, not bytes */
+  NULL,         /* Parameter passed into the task */
+  3,            /* Task priority */
+  &timingHandle);
 
   //Knobs
   keyArrayMutex = xSemaphoreCreateMutex();
@@ -527,4 +551,6 @@ void setup() {
 }
 
 void loop() {
+
+
 }
