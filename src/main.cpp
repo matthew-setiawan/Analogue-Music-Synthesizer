@@ -52,6 +52,7 @@ SemaphoreHandle_t CAN_TX_Semaphore;
 //Recieved Volume
 uint32_t mastervol = 0;
 uint32_t masteroct = 0;
+uint32_t masterwave = 0;
 
 //Key/Val Mapping
 std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
@@ -246,6 +247,10 @@ void readKnobs01(){
     knobCount1 += -1;
   }
   prevKnob1 = knob1;
+
+  if(knobCount1 != 1){
+    knobCount0 = masterwave;
+  }
 }
 
 int rightleftdetect(){
@@ -361,6 +366,8 @@ void displayUpdateTask(void * pvParameters){
     u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
     //u8g2.drawStr(2,10,"Helllo World!");  // write something to the internal memory
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
+
+    //Master/Slave Screen Message
     string state;
     if(knobCount1 == 1){
       state = "master";
@@ -368,7 +375,17 @@ void displayUpdateTask(void * pvParameters){
     else{
       state = "slave";
     }
-    u8g2.drawStr(2,10,(state+" | "+to_string(knobCount0)).c_str());
+
+    //Wave Type Screen Message
+    string wave;
+    if(knobCount0 == 0){
+      wave = "Classic";
+    }
+    else{
+      wave = "Funky";
+    }
+
+    u8g2.drawStr(2,10,(state+" | "+wave).c_str());
     u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
     u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
     xSemaphoreGive(keyArrayMutex);
@@ -403,6 +420,7 @@ void decodeTask(void *pvParameters)
     if(knobCount1==0&&leftpos==1){//handling left slave
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
+      masterwave = RX_Message_local[3];
     }
     else if(knobCount1==0&&leftpos==0){//handling left slave
       mastervol = RX_Message_local[2];
@@ -412,6 +430,7 @@ void decodeTask(void *pvParameters)
       else{
         masteroct = RX_Message_local[1] - 1;
       }
+      masterwave = RX_Message_local[3];
     }
   }
 }
@@ -430,7 +449,7 @@ void CAN_TX_Task (void * pvParameters) {
     if(knobCount1 == 1){
       msgOut[1] = knobCount2;//sending octave
       msgOut[2] = knobCount3;//sending volume
-      msgOut[3] = 1;
+      msgOut[3] = knobCount0;//sending wavetype
       if(masterstate==1){
         CAN_TX(0x123, msgOut);
       }
