@@ -4,12 +4,14 @@
 // Define the delay time and feedback gain for the reverb effect
 const int delayTime = 22000; // 1 second delay at 22 kHz sample rate
 const float feedbackGain = 0.5;
-
-
+int sampleRate = 22000;
+double delay = 0.5;
+double decay = 0.5;
 
 class ReverbEffect
 {
 public:
+    
     ReverbEffect()
     {
         // Allocate memory for the delay buffer
@@ -60,6 +62,19 @@ public:
         }
     }
 
+    void setSampleRate(double SampleRate) {
+        sampleRate = SampleRate;
+    }
+void setDelay(double Delay) {
+        delay = Delay;
+    }
+
+    void setDecay(double Decay) {
+        decay = Decay;
+    }
+
+
+
 private:
     float* delayBuffer;
     int delayIndex;
@@ -77,6 +92,10 @@ void processAudioBlock(float* buffer, int numSamples)
         throw std::invalid_argument("Number of samples must be positive");
     }
 
-    ReverbEffect reverb;
-    reverb.processBlock(buffer, numSamples);
+    ReverbEffect reverbEffect;
+reverbEffect.setSampleRate(22000);
+reverbEffect.setDelay(0.5);
+reverbEffect.setDecay(0.5);
+
+    reverbEffect.processBlock(buffer, numSamples);
 }
