@@ -358,7 +358,7 @@ void scanKeysTask(void * pvParameters) {
 }
 
 void displayUpdateTask(void * pvParameters){
-  const TickType_t xFrequency = 50/portTICK_PERIOD_MS;
+  const TickType_t xFrequency = 150/portTICK_PERIOD_MS;
   TickType_t xLastWakeTime = xTaskGetTickCount();
   while(1){
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
@@ -407,7 +407,7 @@ void displayUpdateTask(void * pvParameters){
     rightleftdetect();
   }
 }
-
+int32_t recvmsg = 0;
 void decodeTask(void *pvParameters)
 {
   int8_t misses = 0; // Checks how many times middle CAN has been missed
@@ -454,6 +454,7 @@ void CAN_TX_Task (void * pvParameters) {
         CAN_TX(0x123, msgOut);
       }
     }
+    
 	}
 }
 
@@ -515,7 +516,7 @@ void setup() {
   "scanKeys",		/* Text name for the task */
   64,      		/* Stack size in words, not bytes */
   NULL,			/* Parameter passed into the task */
-  1,			/* Task priority */
+  2,			/* Task priority */
   &scanKeysHandle);
 
   TaskHandle_t displayUpdateHandle = NULL;
