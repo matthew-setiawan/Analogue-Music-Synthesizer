@@ -64,7 +64,7 @@ We can conduct a timing analysis for the Scan Key Task as follows:
 
 Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline)
 
-Latency Calculation
+### Latency Calculation
 
 According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
 
