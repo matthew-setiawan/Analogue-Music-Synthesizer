@@ -40,7 +40,7 @@ To determine the critical instant analysis of each task we need to determine bot
 For instance, the scanKeysTask() only has a single interrupt and hence the time taken for this task can be determined as follows:
 
 
-$$ T_(scanKeysTask())=\ T_(scankeysmeasured())+\ T_sampleISR=\ 70.7\ +\ 11.3\ =\ 82.0\ \mu s $$
+$$ T_{scanKeysTask()} =\ T_{scankeysmeasured()} +\ T_{sampleISR} =\ 70.7\ +\ 11.3\ =\ 82.0\ \mu s $$
 
 ### Determining Task Deadlines
 
