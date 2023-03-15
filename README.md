@@ -58,7 +58,7 @@ This refers to the maximum allowable time for each CAN transmission.
 
 Considering that the queue has a total length of 36, we can therefore assume the maximum time allowable for this task to be aggregated across 36 executions.
 
-$$ Aggregated-deadline=Queue_-\ size\ast CAN_Task(Deadline)\ =36\ast(50)\/12=150ms\bigm  $$
+$$ Aggregated-deadline=Queue_-\ size\ast CAN_Task(Deadline)\ =36\ast(50)\/12=150ms  $$
 
 
 Likewise, for the decode task, the queue length is the same size and hence we will have a maximal aggregated interval of 150 ms.
@@ -86,7 +86,7 @@ Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask
 
 ### Latency Calculation
 
-$$ Ln\ =\ T_(CAN-TX())+\ T_(decode())+\ T_(displayUpdate())+\ 3\ast T_(scankeys()) $$
+$$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
 $$ \ \ \ \ =\ \ 198+154.1+15826+3\ast(82.0)=\ 16424.1\ \mu s $$
 
