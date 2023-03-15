@@ -11,66 +11,33 @@
 
 using namespace std;
 
-
+//Queues
 QueueHandle_t msgInQ;
 QueueHandle_t msgOutQ;
 
-uint32_t masterstate = 1;
+//Position
+volatile bool leftpos = 0;
 
-//volatile
-volatile uint32_t leftpos = 0;
-
-//sin array
-u_int32_t sinarr[90] = {0,4,8,13,17,22,26,30,35,39,43,47,52,56,60,63,67,71,75,78,82,85,88,92,95,98,100,103,106,108,110,113,115,116,118,120,121,123,124,125,126,126,127,127,127,128,127,127,127,126,126,125,124,123,121,120,118,116,115,113,110,108,106,103,100,98,95,92,88,85,82,78,75,71,67,63,60,56,52,47,43,39,35,30,26,22,17,13,8,4};
-u_int32_t squarearr[90] = {128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128};
-
+//Wavearr: 2D arrays containing all different type of waveforms
 u_int32_t wavearr[2][90] = {{0,4,8,13,17,22,26,30,35,39,43,47,52,56,60,63,67,71,75,78,82,85,88,92,95,98,100,103,106,108,110,113,115,116,118,120,121,123,124,125,126,126,127,127,127,128,127,127,127,126,126,125,124,123,121,120,118,116,115,113,110,108,106,103,100,98,95,92,88,85,82,78,75,71,67,63,60,56,52,47,43,39,35,30,26,22,17,13,8,4},
                           {128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128}};
 
-//Step Size
-volatile uint32_t currentStepSize;
-volatile uint32_t knobCount3;
-volatile uint32_t prevKnob3;
-volatile uint32_t knobCount2;
-volatile uint32_t prevKnob2;
+//KnobValueTracking
+volatile uint32_t knobCount[4] = {0,0,2,0};
+volatile uint32_t prevKnob[4] = {0,0,0,0};
 
-volatile uint32_t knobCount1 = 0;
-volatile uint32_t prevKnob1;
-volatile uint32_t knobCount0;
-volatile uint32_t prevKnob0;
-
-//Key String/Array
+//Tracked Pressed Keys
 volatile uint32_t keyVal = 4095;
-
-//Constants
-const long pibitshift16 = 205887; // define the value of pi
-const long incrbitshift16 = 3;
 
 SemaphoreHandle_t keyArrayMutex;
 SemaphoreHandle_t CAN_TX_Semaphore;
 
 //Recieved Volume
 uint32_t mastervol = 0;
-uint32_t masteroct = 0;
+uint32_t masteroct = 2;
 uint32_t masterwave = 0;
 
-//Key/Val Mapping
-std::map<std::string, std::uint32_t> keyvalmap = {{"111111111111",0},
-                                                {"011111111111",1},
-                                                {"101111111111",2},
-                                                {"110111111111",3},
-                                                {"111011111111",4},
-                                                {"111101111111",5},
-                                                {"111110111111",6},
-                                                {"111111011111",7},
-                                                {"111111101111",8},
-                                                {"111111110111",9},
-                                                {"111111111011",10},
-                                                {"111111111101",11},
-                                                {"111111111110",12}};
-
 const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68178701,72231589,76528508,81077269,85899346,91006452,96418111};
-const uint32_t rawstepSizes [] = {0,262,277,294,311,329,349,369,392,415,440,466,494};
 
 //Constants
 const uint32_t interval = 100; //Display update interval
@@ -133,125 +100,97 @@ const char* intToBinaryString(int value) {
     return buffer;  // Return the binary string as a const char*
 }
 
-uint32_t readCols(){
-  uint32_t retval = 0;
+class readBoard{
+  public:
 
-  //GET C-D#
-  digitalWrite(RA0_PIN, LOW);
-  digitalWrite(RA1_PIN, LOW);
-  digitalWrite(RA2_PIN, LOW);
-  digitalWrite(REN_PIN, HIGH);
-
-  delayMicroseconds(3);
-
-  retval += digitalRead(C0_PIN)<<11;
-  retval += digitalRead(C1_PIN)<<10;
-  retval += digitalRead(C2_PIN)<<9;
-  retval += digitalRead(C3_PIN)<<8;
-
-  //GET E-G
-  digitalWrite(RA0_PIN, HIGH);
-  digitalWrite(RA1_PIN, LOW);
-  digitalWrite(RA2_PIN, LOW);
-  digitalWrite(REN_PIN, HIGH);
-
-  delayMicroseconds(3);
-
-  retval += digitalRead(C0_PIN)<<7;
-  retval += digitalRead(C1_PIN)<<6;
-  retval += digitalRead(C2_PIN)<<5;
-  retval += digitalRead(C3_PIN)<<4;
-
-  //GET C-D#
-  digitalWrite(RA0_PIN, LOW);
-  digitalWrite(RA1_PIN, HIGH);
-  digitalWrite(RA2_PIN, LOW);
-  digitalWrite(REN_PIN, HIGH);
-
-  delayMicroseconds(3);
-
-  retval += digitalRead(C0_PIN)<<3;
-  retval += digitalRead(C1_PIN)<<2;
-  retval += digitalRead(C2_PIN)<<1;
-  retval += digitalRead(C3_PIN)<<0;
-
-  return retval;
-}
-
-void readKnobs(){
-  uint32_t knob3 = 0;
-  uint32_t knob2 = 0;
-  digitalWrite(RA0_PIN, HIGH);
-  digitalWrite(RA1_PIN, HIGH);
-  digitalWrite(RA2_PIN, LOW);
-  digitalWrite(REN_PIN, HIGH);
-  delayMicroseconds(3);
-  //GET KNOB2 
-  knob2 += digitalRead(C2_PIN)<<1;
-  knob2 += digitalRead(C3_PIN)<<0;
-  //GET KNOB3
-  knob3 += digitalRead(C0_PIN)<<1;
-  knob3 += digitalRead(C1_PIN)<<0;
-
-  if(((knob3==1 && prevKnob3==0)||(knob3==2 && prevKnob3==3))&&knobCount3<5){
-    knobCount3 += 1;
+  readBoard(){
   }
-  else if(((knob3==0 && prevKnob3==1)||(knob3==3 && prevKnob3==2))&&knobCount3>0){
-    knobCount3 += -1;
-  }
-  prevKnob3 = knob3;
 
-  if(((knob2==1 && prevKnob2==0)||(knob2==2 && prevKnob2==3))&&knobCount2<5){
-    knobCount2 += 1;
-  }
-  else if(((knob2==0 && prevKnob2==1)||(knob2==3 && prevKnob2==2))&&knobCount2>0){
-    knobCount2 += -1;
-  }
-  prevKnob2 = knob2;
+  uint32_t readKeys(){
+    uint32_t retval = 0;
+    //GET C-D#
+    digitalWrite(RA0_PIN, LOW);
+    digitalWrite(RA1_PIN, LOW);
+    digitalWrite(RA2_PIN, LOW);
+    digitalWrite(REN_PIN, HIGH);
+    delayMicroseconds(3);
+    retval += digitalRead(C0_PIN)<<11;
+    retval += digitalRead(C1_PIN)<<10;
+    retval += digitalRead(C2_PIN)<<9;
+    retval += digitalRead(C3_PIN)<<8;
 
-  if(knobCount1 != 1){
-    knobCount3 = mastervol;
-    knobCount2 = masteroct;
-  }
-}
+    //GET E-G
+    digitalWrite(RA0_PIN, HIGH);
+    digitalWrite(RA1_PIN, LOW);
+    digitalWrite(RA2_PIN, LOW);
+    digitalWrite(REN_PIN, HIGH);
+    delayMicroseconds(3);
+    retval += digitalRead(C0_PIN)<<7;
+    retval += digitalRead(C1_PIN)<<6;
+    retval += digitalRead(C2_PIN)<<5;
+    retval += digitalRead(C3_PIN)<<4;
 
-long testvar = 0;
+    //GET C-D#
+    digitalWrite(RA0_PIN, LOW);
+    digitalWrite(RA1_PIN, HIGH);
+    digitalWrite(RA2_PIN, LOW);
+    digitalWrite(REN_PIN, HIGH);
+    delayMicroseconds(3);
+    retval += digitalRead(C0_PIN)<<3;
+    retval += digitalRead(C1_PIN)<<2;
+    retval += digitalRead(C2_PIN)<<1;
+    retval += digitalRead(C3_PIN)<<0;
 
-void readKnobs01(){
-  uint32_t knob1 = 0;
-  uint32_t knob0 = 0;
-  digitalWrite(RA0_PIN, LOW);
-  digitalWrite(RA1_PIN, LOW);
-  digitalWrite(RA2_PIN, HIGH);
-  digitalWrite(REN_PIN, HIGH);
-  delayMicroseconds(3);
-  //GET KNOB0
-  knob0 += digitalRead(C2_PIN)<<1;
-  knob0 += digitalRead(C3_PIN)<<0;
-  //GET KNOB1
-  knob1 += digitalRead(C0_PIN)<<1;
-  knob1 += digitalRead(C1_PIN)<<0;
+    return retval;
+  }
 
-  if(((knob0==1 && prevKnob0==0)||(knob0==2 && prevKnob0==3))&&knobCount0<1){
-    knobCount0 += 1;
-  }
-  else if(((knob0==0 && prevKnob0==1)||(knob0==3 && prevKnob0==2))&&knobCount0>0){
-    knobCount0 += -1;
-  }
-  prevKnob0 = knob0;
+  void readAllKnobs(int ra0, int ra1, int ra2, int ren, int k1, int k2, int bound){
+    uint32_t knob1 = 0;
+    uint32_t knob0 = 0;
+    digitalWrite(RA0_PIN, ra0);
+    digitalWrite(RA1_PIN, ra1);
+    digitalWrite(RA2_PIN, ra2);
+    digitalWrite(REN_PIN, ren);
+    delayMicroseconds(3);
+    //GET KNOB0
+    knob0 += digitalRead(C2_PIN)<<1;
+    knob0 += digitalRead(C3_PIN)<<0;
+    //GET KNOB1
+    knob1 += digitalRead(C0_PIN)<<1;
+    knob1 += digitalRead(C1_PIN)<<0;
 
-  if(((knob1==1 && prevKnob1==0)||(knob1==2 && prevKnob1==3))&&knobCount1<1){
-    knobCount1 += 1;
-  }
-  else if(((knob1==0 && prevKnob1==1)||(knob1==3 && prevKnob1==2))&&knobCount1>0){
-    knobCount1 += -1;
-  }
-  prevKnob1 = knob1;
+    if(((knob0==1 && prevKnob[k1]==0)||(knob0==2 && prevKnob[k1]==3))&&knobCount[k1]<bound){
+      knobCount[k1] += 1;
+    }
+    else if(((knob0==0 && prevKnob[k1]==1)||(knob0==3 && prevKnob[k1]==2))&&knobCount[k1]>0){
+      knobCount[k1] += -1;
+    }
+    prevKnob[k1] = knob0;
 
-  if(knobCount1 != 1){
-    knobCount0 = masterwave;
+    if(((knob1==1 && prevKnob[k2]==0)||(knob1==2 && prevKnob[k2]==3))&&knobCount[k2]<bound){
+      knobCount[k2] += 1;
+    }
+    else if(((knob1==0 && prevKnob[k2]==1)||(knob1==3 && prevKnob[k2]==2))&&knobCount[k2]>0){
+      knobCount[k2] += -1;
+    }
+    prevKnob[k2] = knob1;
   }
-}
+
+  void readKnobs01(){
+    this->readAllKnobs(0,0,1,1,0,1,1);
+    if(knobCount[1] != 1){
+      knobCount[3] = mastervol;
+      knobCount[2] = masteroct;
+    }
+  }
+  void readKnobs(){
+    this->readAllKnobs(1,1,0,1,2,3,5);
+    if(knobCount[1] != 1){
+      knobCount[0] = masterwave;
+    }
+  }
+
+};
 
 int rightleftdetect(){
   digitalWrite(RA0_PIN, HIGH);
@@ -282,37 +221,29 @@ int rightleftdetect(){
   }
 }
 
+int currentStepCounter = 1;
+
 void sampleISR(){
-  //SAWTOOTH
-  /*
   static uint32_t phaseAcc = 0;
-  phaseAcc = phaseAcc + (currentStepSize>>knobCount2);
-  uint32_t Vout = (phaseAcc>>24) - 128;
-  testvar = Vout;
-  analogWrite(OUTR_PIN, (Vout + 128)>>knobCount3);
-  */
-  //SIN WAVE
-  static uint32_t clocktick = 0;
   uint32_t Vout;
   uint32_t zeroCount = 0;
   uint32_t Vfinal = 0;
   int tempkeyVal = keyVal;
   for(int i=11;i>=0;i--){
     if(tempkeyVal%2==0){
-      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount2)*clocktick)>>22)%360;
+      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount[2])*phaseAcc)>>22)%360;
       if(index>=180){
-        //Vfinal += -sinarr[(index-180)>>1];
-        Vfinal += -wavearr[knobCount0][(index-180)>>1];
+        Vfinal += -wavearr[knobCount[0]][(index-180)>>1];
       }
       else{
-        //Vfinal += sinarr[(index)>>1];
-        Vfinal += wavearr[knobCount0][(index)>>1];
+        Vfinal += wavearr[knobCount[0]][(index)>>1];
       }
       zeroCount += 1;
     }
     tempkeyVal = tempkeyVal/2;
   }
-  testvar = zeroCount;
+  phaseAcc += currentStepCounter;
+
   if(zeroCount < 3){
 
   }
@@ -323,9 +254,10 @@ void sampleISR(){
     zeroCount = 4;
   }
   uint32_t Vres = Vfinal>>zeroCount;
-  analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount3);
-  clocktick +=1;
+  analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount[3]);
 }
+
+readBoard userinput;
 
 void scanKeysTask(void * pvParameters) {
   const TickType_t xFrequency = 50/portTICK_PERIOD_MS;
@@ -333,27 +265,10 @@ void scanKeysTask(void * pvParameters) {
   while(1){
     vTaskDelayUntil( &xLastWakeTime, xFrequency );
     xSemaphoreTake(keyArrayMutex, portMAX_DELAY);
-    keyVal = readCols();
-    readKnobs();
-    readKnobs01();
+    __atomic_store_n(&keyVal, userinput.readKeys(), __ATOMIC_RELAXED);
+    userinput.readKnobs();
+    userinput.readKnobs01();
     xSemaphoreGive(keyArrayMutex);
-    if(keyVal==4095){
-        currentStepSize = stepSizes[0];
-    }
-    else{
-      int indexs[12];
-      int playedcount = 0;
-      for(int i = 0; i < 12; i++){
-        if(intToBinaryString(keyVal)[i]=='0'){
-          indexs[playedcount] = stepSizes[i+1];
-          playedcount += 1;
-        }
-      }
-      currentStepSize = indexs[random(0,playedcount - 1)];
-    }
-    uint8_t TX_Message[8] = {0};
-    //TX_Message[1] = 10;
-    //CAN_TX(0x123, TX_Message);
   }
 }
 
@@ -369,7 +284,7 @@ void displayUpdateTask(void * pvParameters){
 
     //Master/Slave Screen Message
     string state;
-    if(knobCount1 == 1){
+    if(knobCount[1] == 1){
       state = "master";
     }
     else{
@@ -378,7 +293,7 @@ void displayUpdateTask(void * pvParameters){
 
     //Wave Type Screen Message
     string wave;
-    if(knobCount0 == 0){
+    if(knobCount[0] == 0){
       wave = "Classic";
     }
     else{
@@ -386,24 +301,11 @@ void displayUpdateTask(void * pvParameters){
     }
 
     u8g2.drawStr(2,10,(state+" | "+wave).c_str());
-    u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount3)).c_str());
-    u8g2.drawStr(2,30,("Octave: "+to_string(knobCount2)).c_str());
+    u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount[3])).c_str());
+    u8g2.drawStr(2,30,("Octave: "+to_string(knobCount[2])).c_str());
     xSemaphoreGive(keyArrayMutex);
-    //currentStepSize = keystepmap[readCols()];
     u8g2.setCursor(2,20);
-    //u8g2.print(count++);
-    u8g2.sendBuffer();          // transfer internal memory to the display
-    //Toggle LED
-    /*
-    cout << intToBinaryString(keyVal) << endl;
-    digitalToggle(LED_BUILTIN);
-    cout << testvar << endl;
-    cout << knobCount3 << endl;
-    cout << knobCount2 << endl;
-    cout << knobCount1 << endl;
-    cout << knobCount0 << endl;
-    cout << rightleftdetect() << endl;
-    */
+    u8g2.sendBuffer();
     rightleftdetect();
   }
 }
@@ -417,12 +319,12 @@ void decodeTask(void *pvParameters)
     uint32_t ID_Local = 0;
     xQueueReceive(msgInQ, RX_Message_local, portMAX_DELAY);
     //testvar = RX_Message_local[1];
-    if(knobCount1==0&&leftpos==1){//handling left slave
+    if(knobCount[1]==0&&leftpos==1){//handling left slave
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
       masterwave = RX_Message_local[3];
     }
-    else if(knobCount1==0&&leftpos==0){//handling left slave
+    else if(knobCount[1]==0&&leftpos==0){//handling left slave
       mastervol = RX_Message_local[2];
       if(RX_Message_local[1]==0){
         masteroct = 0;
@@ -444,15 +346,11 @@ void CAN_RX_ISR (void) {
 void CAN_TX_Task (void * pvParameters) {
 	uint8_t msgOut[8] = {0};
 	while (1) {
-	  //xQueueReceive(msgOutQ, msgOut, portMAX_DELAY);
-		//xSemaphoreTake(CAN_TX_Semaphore, portMAX_DELAY);
-    if(knobCount1 == 1){
-      msgOut[1] = knobCount2;//sending octave
-      msgOut[2] = knobCount3;//sending volume
-      msgOut[3] = knobCount0;//sending wavetype
-      if(masterstate==1){
-        CAN_TX(0x123, msgOut);
-      }
+    if(knobCount[1] == 1){
+      msgOut[1] = knobCount[2];//sending octave
+      msgOut[2] = knobCount[3];//sending volume
+      msgOut[3] = knobCount[0];//sending wavetype
+      CAN_TX(0x123, msgOut);
     }
     
 	}
