@@ -16,6 +16,11 @@ To determine the timing requirements for tasks and interrupts, we computed the a
   _Figure 1: Timing Analysis for Tasks in The System_
   
   </p>
+  
+  <figure align="center">
+  <img src="/Images/figure-1.png">
+  <figcaption style="text-align:center;">Figure 1: Timing Analysis for Tasks in The System</figcaption>
+</figure>
 
 
 
