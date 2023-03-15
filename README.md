@@ -1,5 +1,5 @@
-# Analogue-Music-Synthesizer
-Embedded Systems Coursework 2
+# Analogue-Music-Synthesizer - Embedded Systems Coursework 2
+
 
 # ES-synth-starter
 
