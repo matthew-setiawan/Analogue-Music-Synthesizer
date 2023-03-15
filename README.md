@@ -10,6 +10,9 @@ To evaluate the reliability of our system, it was necessary to conduct data anal
 To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for.
 
 ![Alt text](/Images/figure-1.png){ width=50% align="center" }
+<p align="center">
+<img src="/Images/figure-1.png" width="200">
+  </p>
 
 _Figure 1: Timing Analysis for Tasks in The System_
 
