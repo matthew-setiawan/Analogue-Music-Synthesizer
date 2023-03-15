@@ -9,9 +9,9 @@ To evaluate the reliability of our system, it was necessary to conduct data anal
 
 To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for.
 
-![Alt text](/Images/figure-1.png){ width=50% align="center" }
+
 <p align="center">
-<img src="/Images/figure-1.png" width="400">
+<img src="/Images/figure-1.png" width="400" alt="Figure 1: Timing Analysis for Tasks in The System">
   
   <p align="center">
     <em>
@@ -19,20 +19,16 @@ To determine the timing requirements for tasks and interrupts, we computed the a
     </em>
  </p>
 </p>
+
+<p align="center">
+<img src="/Images/figure-2.png" width="400" alt="Figure 2: Timing Analysis for Each ISR">
+  
   <p align="center">
- <figure align="center">
-  <img src="/Images/figure-1.png" alt="Figure 1: Timing Analysis for Tasks in The System">
-  <figcaption style="text-align:center;">Figure 1: Timing Analysis for Tasks in The System</figcaption>
-</figure>
+    <em>
+Figure 2: Timing Analysis for Each ISR
+    </em>
+ </p>
 </p>
-
-
-![Alt text](/Images/figure-2.png){ width=50% align="center" }
-
-_Figure 2: Timing Analysis for Each ISR_
-
-
-
 
 
 The aggregated timing statistics indicate consistent pattern wherein the displayUpdate() tasks exhibit significantly longer execution times compared to the other tasks. This can be attributed to the task's requirement to draw the relevant output on the display screen, which significantly increases the time required for this task. Additionally, the scanKeysTask() task exhibits relatively longer execution times, which is justifiable due to the need to scan through the keys, knobs, and joysticks, making this an overall time-consuming task.
@@ -86,6 +82,15 @@ According to the latency calculation of the critical instant, we can observe how
 
 When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously. We hence conducted an analysis by enabling CAN mailboxes and then simply timing the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
 
-![Task utilization statistics from FreeRTOS](/Images/figure-3.png){ width=50% align="center" }
+
+<p align="center">
+<img src="/Images/figure-3.png" width="400" alt="Figure 3: Task utilization statistics from FreeRTOS">
+  
+  <p align="center">
+    <em>
+Figure 3: Task utilization statistics from FreeRTOS
+    </em>
+ </p>
+</p>
 
 It appears how CAN\_TX and RX\_TASKS can have a significant effect on the actual timing when it is running within real-time and disabling the mailboxes slightly oversimplifies the analysis step. Additionally, we see that displayUpdate() still gets carried out for an adequate and significant 24% of the duration which is significantly more than the time spent on scankeys() which is expected due to it taking a large duration to display pixels on screen. Overall, this analysis does confirm that all tasks are running smoothly with all tasks being carried out by the operating system. It does indicate however, that some tasks execution times cannot be oversimplified.
