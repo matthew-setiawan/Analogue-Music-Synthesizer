@@ -52,9 +52,14 @@ The CAN\_TX\_TASK has an explicit deadline that is contingent on the execution o
 
 Primarily the deadline for this task is defined as follows
 
+$$ CAN_TASK(deadline)\ =(scan_{key_deadline\ })/(num_keys\ )=50ms/12=\ 4.167\ ms\  $$
+
 This refers to the maximum allowable time for each CAN transmission.
 
 Considering that the queue has a total length of 36, we can therefore assume the maximum time allowable for this task to be aggregated across 36 executions.
+
+$$ Aggregated-deadline=Queue_-\ size\ast CAN_Task(Deadline)\ =36\ast(50)\/12=150ms\bigm  $$
+
 
 Likewise, for the decode task, the queue length is the same size and hence we will have a maximal aggregated interval of 150 ms.
 
@@ -75,9 +80,15 @@ When considering the priority of the following tasks the analysis is the same fo
 
 We can conduct a timing analysis for the Scan Key Task as follows:
 
+$$ Tn\ =T_{displayUpdate()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
+
 Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline)
 
 ### Latency Calculation
+
+$$ Ln\ =\ T_(CAN-TX())+\ T_(decode())+\ T_(displayUpdate())+\ 3\ast T_(scankeys()) $$
+
+$$ \ \ \ \ =\ \ 198+154.1+15826+3\ast(82.0)=\ 16424.1\ \mu s $$
 
 According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
 
