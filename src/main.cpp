@@ -106,13 +106,17 @@ class readBoard{
   readBoard(){
   }
 
+  void writePins(int ra0, int ra1, int ra2, int ren){
+    digitalWrite(RA0_PIN, ra0);
+    digitalWrite(RA1_PIN, ra1);
+    digitalWrite(RA2_PIN, ra2);
+    digitalWrite(REN_PIN, ren);
+  }
+
   uint32_t readKeys(){
     uint32_t retval = 0;
     //GET C-D#
-    digitalWrite(RA0_PIN, LOW);
-    digitalWrite(RA1_PIN, LOW);
-    digitalWrite(RA2_PIN, LOW);
-    digitalWrite(REN_PIN, HIGH);
+    this->writePins(0,0,0,1);
     delayMicroseconds(3);
     retval += digitalRead(C0_PIN)<<11;
     retval += digitalRead(C1_PIN)<<10;
@@ -120,10 +124,7 @@ class readBoard{
     retval += digitalRead(C3_PIN)<<8;
 
     //GET E-G
-    digitalWrite(RA0_PIN, HIGH);
-    digitalWrite(RA1_PIN, LOW);
-    digitalWrite(RA2_PIN, LOW);
-    digitalWrite(REN_PIN, HIGH);
+    this->writePins(1,0,0,1);
     delayMicroseconds(3);
     retval += digitalRead(C0_PIN)<<7;
     retval += digitalRead(C1_PIN)<<6;
@@ -131,10 +132,7 @@ class readBoard{
     retval += digitalRead(C3_PIN)<<4;
 
     //GET C-D#
-    digitalWrite(RA0_PIN, LOW);
-    digitalWrite(RA1_PIN, HIGH);
-    digitalWrite(RA2_PIN, LOW);
-    digitalWrite(REN_PIN, HIGH);
+    this->writePins(0,1,0,1);
     delayMicroseconds(3);
     retval += digitalRead(C0_PIN)<<3;
     retval += digitalRead(C1_PIN)<<2;
@@ -147,10 +145,7 @@ class readBoard{
   void readAllKnobs(int ra0, int ra1, int ra2, int ren, int k1, int k2, int bound){
     uint32_t knob1 = 0;
     uint32_t knob0 = 0;
-    digitalWrite(RA0_PIN, ra0);
-    digitalWrite(RA1_PIN, ra1);
-    digitalWrite(RA2_PIN, ra2);
-    digitalWrite(REN_PIN, ren);
+    this->writePins(ra0,ra1,ra2,ren);
     delayMicroseconds(3);
     //GET KNOB0
     knob0 += digitalRead(C2_PIN)<<1;
@@ -192,17 +187,13 @@ class readBoard{
 
 };
 
+readBoard userinput;
+
 int rightleftdetect(){
-  digitalWrite(RA0_PIN, HIGH);
-  digitalWrite(RA1_PIN, LOW);
-  digitalWrite(RA2_PIN, HIGH);
-  digitalWrite(REN_PIN, HIGH);
+  userinput.writePins(1,0,1,1);
   delayMicroseconds(3);
   int west = digitalRead(C3_PIN);
-  digitalWrite(RA0_PIN, LOW);
-  digitalWrite(RA1_PIN, HIGH);
-  digitalWrite(RA2_PIN, HIGH);
-  digitalWrite(REN_PIN, HIGH);
+  userinput.writePins(0,1,1,1);
   delayMicroseconds(3);
   int east = digitalRead(C3_PIN);
   if(west==1&&east==1){
@@ -256,8 +247,6 @@ void sampleISR(){
   uint32_t Vres = Vfinal>>zeroCount;
   analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount[3]);
 }
-
-readBoard userinput;
 
 void scanKeysTask(void * pvParameters) {
   const TickType_t xFrequency = 50/portTICK_PERIOD_MS;
@@ -389,10 +378,6 @@ void setup() {
   setOutMuxBit(DRST_BIT, HIGH);  //Release display logic reset
   u8g2.begin();
   setOutMuxBit(DEN_BIT, HIGH);  //Enable display power supply
-
-  //Initialise UART
-  Serial.begin(9600);
-  Serial.println("Hello World");
 
   //Initialise CAN Communication
   CAN_Init(false);
