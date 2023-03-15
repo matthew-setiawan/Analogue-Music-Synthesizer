@@ -52,13 +52,13 @@ The CAN\_TX\_TASK has an explicit deadline that is contingent on the execution o
 
 Primarily the deadline for this task is defined as follows
 
-$$ CAN\_TASK(deadline)\ =(scan_{key_deadline\ })/(num_keys\ )=50ms/12=\ 4.167\ ms\  $$
+$$ CAN_{TASK(deadline)}\ =(scan_{key_deadline\ })/(num_keys\ )=50ms/12=\ 4.167\ ms\  $$
 
 This refers to the maximum allowable time for each CAN transmission.
 
 Considering that the queue has a total length of 36, we can therefore assume the maximum time allowable for this task to be aggregated across 36 executions.
 
-$$ Aggregated-deadline=Queue_-\ size\ast CAN\_Task(Deadline)\ =36\ast(50)\/12=150ms  $$
+$$ Aggregated-deadline=Queue_{size} \ast CAN_{Task(Deadline)}\ =36\ast(50)\/12=150ms  $$
 
 
 Likewise, for the decode task, the queue length is the same size and hence we will have a maximal aggregated interval of 150 ms.
