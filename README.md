@@ -39,6 +39,9 @@ To determine the critical instant analysis of each task we need to determine bot
 
 For instance, the scanKeysTask() only has a single interrupt and hence the time taken for this task can be determined as follows:
 
+
+$$ T_(scanKeysTask())=\ T_(scankeysmeasured())+\ T_sampleISR=\ 70.7\ +\ 11.3\ =\ 82.0\ \mu s $$
+
 ### Determining Task Deadlines
 
 The deadlines for the displayUpdateTask() and scanKeysTask() are definable based on the port max frequency from STM32 and primarily use the vTaskDelayUntil() parameter. In our implementation, we extended the scheduling interval for displayUpdateTask() to 150ms for as it's acceptable to wait for a period of 0.15s for the task to occur and it's a task of lower priority.
@@ -84,7 +87,7 @@ When the real-time operating system is running, we decided to consider a realist
 
 
 <p align="center">
-<img src="/Images/figure-3.png" width="400" alt="Figure 3: Task utilization statistics from FreeRTOS">
+<img src="/Images/figure-3.jpg" width="400" alt="Figure 3: Task utilization statistics from FreeRTOS">
   
   <p align="center">
     <em>
