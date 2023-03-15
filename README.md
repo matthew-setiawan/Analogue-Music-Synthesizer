@@ -9,11 +9,11 @@ To evaluate the reliability of our system, it was necessary to conduct data anal
 
 To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for.
 
-![Alt text](/images/figure-1.png){ width=50% align="center" }
+![Alt text](/Images/figure-1.png){ width=50% align="center" }
 
 _Figure 1: Timing Analysis for Tasks in The System_
 
-![Alt text](/images/figure-2.png){ width=50% align="center" }
+![Alt text](/Images/figure-2.png){ width=50% align="center" }
 
 _Figure 2: Timing Analysis for Each ISR_
 
@@ -72,6 +72,6 @@ According to the latency calculation of the critical instant, we can observe how
 
 When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously. We hence conducted an analysis by enabling CAN mailboxes and then simply timing the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
 
-![Task utilization statistics from FreeRTOS](/images/figure-3.png){ width=50% align="center" }
+![Task utilization statistics from FreeRTOS](/Images/figure-3.png){ width=50% align="center" }
 
 It appears how CAN\_TX and RX\_TASKS can have a significant effect on the actual timing when it is running within real-time and disabling the mailboxes slightly oversimplifies the analysis step. Additionally, we see that displayUpdate() still gets carried out for an adequate and significant 24% of the duration which is significantly more than the time spent on scankeys() which is expected due to it taking a large duration to display pixels on screen. Overall, this analysis does confirm that all tasks are running smoothly with all tasks being carried out by the operating system. It does indicate however, that some tasks execution times cannot be oversimplified.
