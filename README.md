@@ -11,10 +11,13 @@ To determine the timing requirements for tasks and interrupts, we computed the a
 
 ![Alt text](/Images/figure-1.png){ width=50% align="center" }
 <p align="center">
-<img src="/Images/figure-1.png" width="200">
+<img src="/Images/figure-1.png" width="400">
+  
+  _Figure 1: Timing Analysis for Tasks in The System_
+  
   </p>
 
-_Figure 1: Timing Analysis for Tasks in The System_
+
 
 ![Alt text](/Images/figure-2.png){ width=50% align="center" }
 
