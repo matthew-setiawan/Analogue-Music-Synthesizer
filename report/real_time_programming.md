@@ -26,7 +26,7 @@ Table 1 below shows how thread safety was implemented on a system level.
 | msgOutQ       | QueueHandle_t        |                      |                                         | Queue               |
 | leftpos       | bool                 | decodeTask           | displayUpdateTask                       | Regular access      |
 | wavearr       | 2D array of uint32_t | sampleISR            |                                         | Regular access      |
-| knobCount     | 1D array of uint32_t | CAN_TX_Task          | scanKeysTask, decodeTask                | Mutex, Semaphore    |
+| knobCount     | 1D array of uint32_t | CAN_TX_Task, scanKeysTask, decodeTask, sampleISR, displayUpdateTask          | scanKeysTask               | Mutex, Semaphore    |
 | prevKnob      | 1D array of uint32_t | scanKeysTask         | scanKeysTask                            | Mutex, Semaphore    |
 | keyVal        | uint32_t             | sampleISR            | scanKeysTask                            | Atomic Store        |
 | mastervol     | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
