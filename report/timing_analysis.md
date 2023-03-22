@@ -90,6 +90,35 @@ $$ \ \ \ \ =\ \ 198+154.1+15826+3\ast(82.0)=\ 16424.1\ \mu s $$
 
 According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
 
+## CPU Memory and Utilization
+
+### Stack Size Utilization
+
+The stack size of a task affects CPU utilisation by determining the amount of memory reserved for each task to store function call information and local variables. Small stack sizes may lead to memory-related issues, while a large stack size wastes valuable memory resources. The optimal stack size maximizes CPU utilisation by balancing the number of available stacks and task switching overhead. 
+
+We first calculate the total stack size used by all tasks: 64 + 256 + 32 + 32 = 384 words.  
+
+Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1536 bytes. 
+
+This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
+
+### CPU Utilization
+
+When considering the CPU utilisation, we assume that vTask scheduler can run all tasks in parallel and we can calculate the CPU utilisation by examining the execution times. We also consider the rate monotic scheduling system and priorities assigned to estimate this statistic: 
+
+$$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ Time_i} [1] $$
+
+Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
+
+$$ \sum\limits_{i=1}^n Execution \ Time_i = T_{CAN_TX}() + T_{decode}() + T_{displayUpdate}() + 3*T_{scankeys}() = 16424.1 \ \mu s $$
+
+
+
+Utilization = 16.424/150 = 10.95% (for a critical instant).  
+
+The overall CPU utilization statistic supports how the CPU is capable of comfortably executing all tasks by the deadline with potential leeway to add more tasks to the scheduler. However, there are some further considerations that may need to be observed. When timing this code, we do not explicitly wait for a free mailbox in CAN_TX_TASK (). Therefore, it is necessary and expected for our current CPU utilisation to be lower than in the real-time operating system. 
+
+
 ## Real World Timing Statistics
 
 When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously. We hence conducted an analysis by enabling CAN mailboxes and then simply timing the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
@@ -106,3 +135,8 @@ Figure 3: Task utilization statistics from FreeRTOS
 </p>
 
 It appears how CAN\_TX and RX\_TASKS can have a significant effect on the actual timing when it is running within real-time and disabling the mailboxes slightly oversimplifies the analysis step. Additionally, we see that displayUpdate() still gets carried out for an adequate and significant 24% of the duration which is significantly more than the time spent on scankeys() which is expected due to it taking a large duration to display pixels on screen. Overall, this analysis does confirm that all tasks are running smoothly with all tasks being carried out by the operating system. It does indicate however, that some tasks execution times cannot be oversimplified.
+
+
+## References
+
+1. Bell, J. (n.d.). CPU Scheduling. Retrieved March 22, 2023, from University of Illinois at Chicago Department of Computer Science website: https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/6_CPU_Scheduling
