@@ -71,9 +71,9 @@
 #### 4.5 Keyboard Autodetect 
 
 
-  #### Project Guidance
+  ### Appendix
 
-  Use this project as the starting point for your Embedded Systems labs and coursework.
+  The following projects were used as starting points for this Embedded Systems labs and coursework.
   
   [Lab Part 1](doc/LabPart1.md)
   
