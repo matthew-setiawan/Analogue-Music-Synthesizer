@@ -23,7 +23,7 @@
 
   ### [4 Advanced Features](report/advanced_features.md)
   
-#### 4.1 Handshaking and auto detection for multiple boards
+#### [4.1 Handshaking and auto detection for multiple boards](doc/handshaking.md)
 
 #### 4.2 Automatic octave adjustments across multiple boards
 
@@ -34,9 +34,6 @@
 #### 4.5 Keyboard Autodetect 
 
 
-### Additional Information
-  [Handshaking and auto-detection](doc/handshaking.md)
-  
   #### Project Guidance
 
   Use this project as the starting point for your Embedded Systems labs and coursework.
