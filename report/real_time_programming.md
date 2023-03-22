@@ -4,10 +4,11 @@ A series of real-time programming techniques was considered to ensure the system
 
 ## 2.1 Design and Architecture
 
-Our overall design architecture consists of a series of tasks running in parallel by a task scheduler and ISR interrupts which are called and initiated in the setup function. Figure 1 shows a diagram to indicate the dependencies in the system.  
+Our overall design architecture consists of a series of tasks running in parallel by a task scheduler and ISR interrupts which are called and initiated in the setup function. Figure 1 demonstrates a diagram of dependencies and links between the different subroutines and variables.  
+
 
 <p align="center">
-<img src="/Images/figure-1.png" width="400" alt="Figure 1: Timing Analysis for Tasks in The System">
+<img src="/Images/Dependencies Diagram Emb CW2.png" width="400" alt="Figure 1: Links between the different subroutines and variables">
   
   <p align="center">
     <em>
@@ -15,6 +16,7 @@ Our overall design architecture consists of a series of tasks running in paralle
     </em>
  </p>
 </p>
+
 
 ## 2.2 Performance, Reliability and Robustness
 
