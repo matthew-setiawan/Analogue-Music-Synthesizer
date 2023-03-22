@@ -75,9 +75,9 @@
 
   The following projects were used as starting points for this Embedded Systems labs and coursework.
   
-  [Lab Part 1](doc/LabPart1.md)
+  [Lab Part 1](report/LabPart1.md)
   
-  [Lab Part 2](doc/LabPart2.md)
+  [Lab Part 2](report/LabPart2.md)
   
   TO BE REMOVED:
   
