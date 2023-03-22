@@ -16,12 +16,10 @@
   
   <p align="center">
   <img src="https://user-images.githubusercontent.com/4660308/158452707-842ba356-4171-48b7-812b-7b6633ee56c8.png" width="600">
-  
     <p align="center">
     <em>
   Figure 1: Inter-module connectors of east/west handshake signals
     </em>
-  
 </p>
 
   Each module can generate a handshake signal on its west and east connectors.
