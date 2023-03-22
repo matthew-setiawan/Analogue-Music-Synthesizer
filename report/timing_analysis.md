@@ -5,11 +5,12 @@ To evaluate the reliability of our system, it was necessary to conduct data anal
 
 ### Methodology
 
-To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for.
+To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for. 
+Figure 1 demonstrates a diagram of dependencies and links between the different subroutines and variables.
 
 
 <p align="center">
-<img src="/Images/Dependencies Diagram Emb CW2.png" width="400" alt="Figure 1: Timing Analysis for Tasks in The System">
+<img src="/Images/Dependencies Diagram Emb CW2.png" width="400" alt="Figure 1: Links between the different subroutines and variables">
   
   <p align="center">
     <em>
