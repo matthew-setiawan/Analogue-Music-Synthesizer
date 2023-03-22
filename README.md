@@ -1,5 +1,7 @@
 # Analogue-Music-Synthesizer - Embedded Systems Coursework 2
 
+  # Running The Code
+  Please navigate to the branch 
 
   # Report
   
