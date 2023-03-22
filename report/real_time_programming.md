@@ -20,24 +20,33 @@ Thread safety was an imperative consideration for our code development primarily
 
 Table 1 below shows how thread safety was implemented on a system level.  
 
-$$ \begin{tabular}{|l|l|l|l|l|}
-\hline
-\textbf{Variable Name} & \textbf{Variable Type} & \textbf{Read By} & \textbf{Write By} & \textbf{Access Method} \ \hline
-msgInQ & QueueHandle_t & decodeTask & CAN_RX_ISR & Queue \ \hline
-msgOutQ & QueueHandle_t & & & Queue \ \hline
-leftpos & bool & decodeTask & displayUpdateTask & Regular access \ \hline
-wavearr & 2D array of uint32_t & sampleISR & & Regular access \ \hline
-knobCount & 1D array of uint32_t & CAN_TX_Task & scanKeysTask, decodeTask & Mutex, Semaphore \ \hline
-prevKnob & 1D array of uint32_t & scanKeysTask & scanKeysTask & Mutex, Semaphore \ \hline
-keyVal & uint32_t & sampleISR & scanKeysTask & Atomic Store \ \hline
-mastervol & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
-masteroct & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
-masterwave & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
-stepSizes & 1D array of uint32_t & sampleISR & & Regular access \ \hline
-\end{tabular} $$
+Variable Name	Variable Type	Read By	Write By	Access Method
+msgInQ	QueueHandle_t	decodeTask	CAN_RX_ISR	Queue
+msgOutQ	QueueHandle_t			Queue
+leftpos	bool	decodeTask	displayUpdateTask	Regular access
+wavearr	2D array of uint32_t	sampleISR		Regular access
+knobCount	1D array of uint32_t	CAN_TX_Task	scanKeysTask, decodeTask	Mutex, Semaphore
+prevKnob	1D array of uint32_t	scanKeysTask	scanKeysTask	Mutex, Semaphore
+keyVal	uint32_t	sampleISR	scanKeysTask	Atomic Store
+mastervol	uint32_t	scanKeysTask	decodeTask	Regular access
+masteroct	uint32_t	scanKeysTask	decodeTask	Regular access
+masterwave	uint32_t	scanKeysTask	decodeTask	Regular access
+stepSizes	1D array of uint32_t	sampleISR		Regular access
+
 
   <p align="center">
     <em>
   Table 1: Summarising system-level thread safety implementation 
     </em>
  </p>
+ 
+ 
+### 2.2.2 Interrupts 
+
+### 2.2.3 Minimize Memory Usage
+
+To reduce CPU utilization, our group considered the storage and access of variables within the system.   
+
+For our scankeyTask() we used an integer variable to store the scanned key values instead of an array. Implementing an array for this task would require a memory allocation equivalent to a total of 12 integer value as necessary to store all keys. However, using a 1 hot encoding process would be spatially inefficient in our system and as such we opted to store the scankey() state in an integer instead.  
+
+Additionally, our sine wave table is optimised in terms of spatial requirements. By considering the shape of a sinusoidal wave, we can determine how the absolute values are periodic at a period of Pi. As a result, when considering these waves, we only store 90 sine values in the array to represent the wave tending from 0-pi instead of storing all wave values spanning 0-2pi in period.   
