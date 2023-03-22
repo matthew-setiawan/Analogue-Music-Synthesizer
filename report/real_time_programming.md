@@ -20,18 +20,19 @@ Thread safety was an imperative consideration for our code development primarily
 
 Table 1 below shows how thread safety was implemented on a system level.  
 
-Variable Name	Variable Type	Read By	Write By	Access Method
-msgInQ	QueueHandle_t	decodeTask	CAN_RX_ISR	Queue
-msgOutQ	QueueHandle_t			Queue
-leftpos	bool	decodeTask	displayUpdateTask	Regular access
-wavearr	2D array of uint32_t	sampleISR		Regular access
-knobCount	1D array of uint32_t	CAN_TX_Task	scanKeysTask, decodeTask	Mutex, Semaphore
-prevKnob	1D array of uint32_t	scanKeysTask	scanKeysTask	Mutex, Semaphore
-keyVal	uint32_t	sampleISR	scanKeysTask	Atomic Store
-mastervol	uint32_t	scanKeysTask	decodeTask	Regular access
-masteroct	uint32_t	scanKeysTask	decodeTask	Regular access
-masterwave	uint32_t	scanKeysTask	decodeTask	Regular access
-stepSizes	1D array of uint32_t	sampleISR		Regular access
+| Variable Name | Variable Type        | Read By               | Write By                                | Access Method       |
+| ------------- | --------------------| ---------------------| ---------------------------------------|---------------------|
+| msgInQ        | QueueHandle_t        | decodeTask           | CAN_RX_ISR                              | Queue               |
+| msgOutQ       | QueueHandle_t        |                      |                                         | Queue               |
+| leftpos       | bool                 | decodeTask           | displayUpdateTask                       | Regular access      |
+| wavearr       | 2D array of uint32_t | sampleISR            |                                         | Regular access      |
+| knobCount     | 1D array of uint32_t | CAN_TX_Task          | scanKeysTask, decodeTask                | Mutex, Semaphore    |
+| prevKnob      | 1D array of uint32_t | scanKeysTask         | scanKeysTask                            | Mutex, Semaphore    |
+| keyVal        | uint32_t             | sampleISR            | scanKeysTask                            | Atomic Store        |
+| mastervol     | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
+| masteroct     | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
+| masterwave    | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
+| stepSizes     | 1D array of uint32_t | sampleISR            |                                         | Regular access      |
 
 
   <p align="center">
