@@ -20,7 +20,7 @@ Thread safety was an imperative consideration for our code development primarily
 
 Table 1 below shows how thread safety was implemented on a system level.  
 
-\begin{tabular}{|l|l|l|l|l|}
+$$ \begin{tabular}{|l|l|l|l|l|}
 \hline
 \textbf{Variable Name} & \textbf{Variable Type} & \textbf{Read By} & \textbf{Write By} & \textbf{Access Method} \ \hline
 msgInQ & QueueHandle_t & decodeTask & CAN_RX_ISR & Queue \ \hline
@@ -34,7 +34,7 @@ mastervol & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
 masteroct & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
 masterwave & uint32_t & scanKeysTask & decodeTask & Regular access \ \hline
 stepSizes & 1D array of uint32_t & sampleISR & & Regular access \ \hline
-\end{tabular}
+\end{tabular} $$
 
   <p align="center">
     <em>
