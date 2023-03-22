@@ -9,7 +9,7 @@ To determine the timing requirements for tasks and interrupts, we computed the a
 
 
 <p align="center">
-<img src="/Images/figure-1.png" width="400" alt="Figure 1: Timing Analysis for Tasks in The System">
+<img src="/Images/Dependencies Diagram Emb CW2.png" width="400" alt="Figure 1: Timing Analysis for Tasks in The System">
   
   <p align="center">
     <em>
