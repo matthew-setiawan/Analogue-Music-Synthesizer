@@ -118,6 +118,5 @@
 
 ## 4.4 Polyphony 
 
-## 4.5 Keyboard Autodetect 
+Polyphony means the generation of multiple waves and summing them together. This allows for multiple waves to be played at the same time. It is important to implement this feature without dynamically scaling the amplitude to ensure that the output is not too large. This can be achieved by clipping the output.
 
-Offering dynamic..
