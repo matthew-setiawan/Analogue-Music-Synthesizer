@@ -92,9 +92,9 @@ Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask
 
 $$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
-$$ \ \ \ \ =\ \ 198+154.1+2\ast(15826)+3\ast(82.0)=\ 16424.1\ \mu s $$
+$$ \ \ \ \ =\ \ 198+154.1+2\ast(15826)+3\ast(82.0)=\ 32250.4\ \mu s $$
 
-According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
+According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis. 32.2504<150ms which corresponds to the deadline of lowest priority CAN_TX_TASK(). There should be sufficient time for the tasks to occur. Additionally, we can see that this is also significantly lower than the time for displayUpdate() deadline.
 
 ## 3.3 CPU Memory and Utilization
 
