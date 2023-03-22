@@ -23,7 +23,7 @@
 
   ### [4 Advanced Features](report/advanced_features.md)
   
-#### [4.1 Handshaking and auto detection for multiple boards](doc/handshaking.md)
+#### [4.1 Handshaking and auto detection for multiple boards](https://github.com/matthew-setiawan/Analogue-Music-Synthesizer/blob/main/report/advanced_features.md#handshaking-and-auto-detection)
 
 #### 4.2 Automatic octave adjustments across multiple boards
 
