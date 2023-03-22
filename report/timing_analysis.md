@@ -64,7 +64,7 @@ $$ Aggregated-deadline=Queue_{size} \ast CAN_{Task(Deadline)}\ =36\ast(50)\/12=1
 
 Likewise, for the decode task, the queue length is the same size and hence we will have a maximal aggregated interval of 150 ms.
 
-### 3.3.3 Timing Analysis
+### 3.2.3 Timing Analysis
 
 After determining the interruptions and measured time per task, the following table was produced. Here, CAN\_TX\_TASK() and decodeTask() consider the aggregated time taken across 36 intervals.
 
@@ -77,7 +77,7 @@ After determining the interruptions and measured time per task, the following ta
 
 When considering the priority of the following tasks the analysis is the same for all 3 of the displayTask() for 36 intervals, CAN\_TX\_TASK() for 36 intervals, and decodeTask() as they have equal initiation times and are all lowest priority tasks. The decision to do this was because it is important to ensure that display can be adequately handled to provide an essential user-interface, and this is equally important as CAN\_TX\_TASK() and decodeTask(). CAN and decodeTask() are important too as we need to ensure that sound can be broadcasted to different speakers.
 
-### 3.3.4 Scan Key Task Timing
+### 3.2.4 Scan Key Task Timing
 
 We can conduct a timing analysis for the Scan Key Task as follows:
 
@@ -85,7 +85,7 @@ $$ Tn\ =T_{displayUpdate()}/T_{scanKeys()}\ =150/50=\ 3\  $$
 
 Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline)
 
-### 3.3.5 Latency Calculation
+### 3.2.5 Latency Calculation
 
 $$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
@@ -93,9 +93,9 @@ $$ \ \ \ \ =\ \ 198+154.1+15826+3\ast(82.0)=\ 16424.1\ \mu s $$
 
 According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
 
-## 3.4 CPU Memory and Utilization
+## 3.3 CPU Memory and Utilization
 
-### 3.4.1 Stack Size Utilization
+### 3.3.1 Stack Size Utilization
 
 The stack size of a task affects CPU utilisation by determining the amount of memory reserved for each task to store function call information and local variables. Small stack sizes may lead to memory-related issues, while a large stack size wastes valuable memory resources. The optimal stack size maximizes CPU utilisation by balancing the number of available stacks and task switching overhead. 
 
@@ -105,7 +105,7 @@ Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1
 
 This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
 
-### 3.4.2 CPU Utilization
+### 3.3.2 CPU Utilization
 
 When considering the CPU utilisation, we assume that vTask scheduler can run all tasks in parallel and we can calculate the CPU utilisation by examining the execution times. We also consider the rate monotic scheduling system and priorities assigned to estimate this statistic: 
 
@@ -122,7 +122,7 @@ Utilization = 16.424/150 = 10.95% (for a critical instant).
 The overall CPU utilization statistic supports how the CPU is capable of comfortably executing all tasks by the deadline with potential leeway to add more tasks to the scheduler. However, there are some further considerations that may need to be observed. When timing this code, we do not explicitly wait for a free mailbox in CAN_TX_TASK (). Therefore, it is necessary and expected for our current CPU utilisation to be lower than in the real-time operating system. 
 
 
-## 3.5 Real World Timing Statistics
+## 3.4 Real World Timing Statistics
 
 When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously. We hence conducted an analysis by enabling CAN mailboxes and then simply timing the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
 
