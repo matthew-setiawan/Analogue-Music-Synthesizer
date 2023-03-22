@@ -5,7 +5,7 @@
   
   This report focuses on the development of an embedded software for a music synthesizer circuit.
   
-  The report highlights the solutions leading to a robust real-time programming implementation. More specifically, it details the allocation of functions to tasks, the time characterisation of these tasks, how data is shared and synchronised between these and any deadlocks that may occur.
+  The report highlights the solutions leading to a robust real-time programming implementation. More specifically, it details the allocation of functions to tasks, the time characterisation of these tasks, how data is shared and synchronised between these and any deadlocks that may occur. Please see and click the relevant sections in the below table of contents to learn more about our task and implementation.
 
 ## Table of Contents
 
