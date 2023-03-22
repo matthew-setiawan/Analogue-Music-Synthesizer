@@ -1,16 +1,6 @@
 # Analogue-Music-Synthesizer - Embedded Systems Coursework 2
 
 
-# ES-synth-starter
-
-  Use this project as the starting point for your Embedded Systems labs and coursework.
-  
-  [Lab Part 1](doc/LabPart1.md)
-  
-  [Lab Part 2](doc/LabPart2.md)
-  
-  
-  
   # Report
   
   This report focuses on the development of an embedded software for a music synthesizer circuit.
@@ -36,6 +26,14 @@
 
 ### Additional Information
   [Handshaking and auto-detection](doc/handshaking.md)
+  
+  #### Project Guidance
+
+  Use this project as the starting point for your Embedded Systems labs and coursework.
+  
+  [Lab Part 1](doc/LabPart1.md)
+  
+  [Lab Part 2](doc/LabPart2.md)
   
   TO BE REMOVED:
   
