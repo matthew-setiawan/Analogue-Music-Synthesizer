@@ -13,6 +13,8 @@
 
   ### [2 Real-Time Programming](report/real_time_programming.md)
   
+  A series of real-time programming techniques was considered to ensure the system is both performant, robust, and reliable.
+  
   
   ### [3 Real-Time System Analysis](report/timing_analysis.md)
   
