@@ -45,7 +45,7 @@ $$ T_{scanKeysTask()} =\ T_{scankeysmeasured()} +\ T_{sampleISR} =\ 70.7\ +\ 11.
 
 ### 3.2.1 Determining Task Deadlines
 
-The deadlines for the displayUpdateTask() and scanKeysTask() are definable based on the port max frequency from STM32 and primarily use the vTaskDelayUntil() parameter. In our implementation, we extended the scheduling interval for displayUpdateTask() to 150ms for as it's acceptable to wait for a period of 0.15s for the task to occur and it's a task of lower priority.
+The deadlines for the displayUpdateTask() and scanKeysTask() are definable based on the port max frequency from STM32 and primarily use the vTaskDelayUntil() parameter. In our implementation, we extended the scheduling interval for displayUpdateTask() to 100ms as per the specifications delineated and that it is acceptable to wait a period of 0.1s for a screen to update and it's a task of lower priority. Meanwhile, scanKeysTask() has the deadline of 50ms as was initially defined.  
 
 ### 3.2.2 Calculating Deadlines CAN Transmission
 
@@ -71,7 +71,7 @@ After determining the interruptions and measured time per task, the following ta
 | **Task Name and Time Including Interrupts** | **Initiation Time – Tau (ms)** | **Execution Time – Ti (&micro s)** | **Priority Assigned** |
 | --- | --- | --- | --- |
 | scanKeys() | 50 | 82.0 | 2 |
-| displayUpdate() | 150 | 15826 | 1 |
+| displayUpdate() | 100 | 15826 | 1 |
 | CAN\_TX() | 150 | 198.0 | 1 |
 | decode() | 150 | 154.1 | 1 |
 
@@ -79,17 +79,20 @@ When considering the priority of the following tasks the analysis is the same fo
 
 ### 3.2.4 Scan Key Task Timing
 
-We can conduct a timing analysis for the Scan Key Task as follows:
+We can conduct a timing analysis for the Scan Key Task and Display Update Task as follows to calculate and assess the critical instant analysis. The CAN_TX() task is primarily what we use to assess and determine the relevant critical instants. 
 
-$$ Tn\ =T_{displayUpdate()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
+$$ Tn\scanKeys() =T_{CAN\_TX()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
+$$ Tn\displayUpdate() =T_{CAN\_TX()}/T_{displayUpdate()}\ =150/100=\ 1.5 --> 2\  $$ 
+
+
 
 Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline)
 
 ### 3.2.5 Latency Calculation
 
-$$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
+$$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
-$$ \ \ \ \ =\ \ 198+154.1+15826+3\ast(82.0)=\ 16424.1\ \mu s $$
+$$ \ \ \ \ =\ \ 198+154.1+2\ast(15826)+3\ast(82.0)=\ 16424.1\ \mu s $$
 
 According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis.
 
@@ -113,11 +116,11 @@ $$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ 
 
 Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
 
-$$ \sum\limits_{i=1}^n Execution \ Time_i = T_{CAN_TX}() + T_{decode}() + T_{displayUpdate}() + 3*T_{scankeys}() = 16424.1 \ \mu s $$
+$$ \sum\limits_{i=1}^n Execution \ Time_i = T_{CAN_TX}() + T_{decode}() + 2*T_{displayUpdate}() + 3*T_{scankeys}() = 32250.4 \ \mu s $$
 
 
 
-Utilization = 16.424/150 = 10.95% (for a critical instant).  
+Utilization = 32.2504/150 = 21.50% (for a critical instant).  
 
 The overall CPU utilization statistic supports how the CPU is capable of comfortably executing all tasks by the deadline with potential leeway to add more tasks to the scheduler. However, there are some further considerations that may need to be observed. When timing this code, we do not explicitly wait for a free mailbox in CAN_TX_TASK (). Therefore, it is necessary and expected for our current CPU utilisation to be lower than in the real-time operating system. 
 
