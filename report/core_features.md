@@ -60,7 +60,9 @@ retval += digitalRead(C3_PIN)<<0;
 
 We used a simple loop to iterate through bits of keyVal and find out which notes are being played. For each key being pressed we play the specified wave with the corresponding frequency specified in our stepSizes array:
 
-```const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68178701,72231589,76528508,81077269,85899346,91006452,96418111};```
+```
+const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68178701,72231589,76528508,81077269,85899346,91006452,96418111};
+```
 
 ## 1.3 Knob Integration
 
