@@ -81,8 +81,9 @@ When considering the priority of the following tasks the analysis is the same fo
 
 We can conduct a timing analysis for the Scan Key Task and Display Update Task as follows to calculate and assess the critical instant analysis. The CAN_TX() task is primarily what we use to assess and determine the relevant critical instants. 
 
-$$ Tn\scanKeys() =T_{CAN\_TX()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
-$$ Tn\displayUpdate() =T_{CAN\_TX()}/T_{displayUpdate()}\ =150/100=\ 1.5 --> 2\  $$ 
+$$ Tn_{scanKeys()} =T_{CAN\_TX()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
+
+$$ Tn_{displayUpdate()} =T_{CAN\_TX()}/T_{displayUpdate()}\ =150/100=\ 1.5 --> 2\  $$ 
 
 
 
@@ -116,7 +117,9 @@ $$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ 
 
 Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
 
-$$ \sum\limits_{i=1}^n Execution \ Time_i = T_{CAN_TX}() + T_{decode}() + 2*T_{displayUpdate}() + 3*T_{scankeys}() = 32250.4 \ \mu s $$
+
+$$ \sum\limits_{i=1}^n \text{Execution Time}\_i = T\_{CAN\_TX}() + T\_{decode}() + 2*T\_{displayUpdate}() + 3 * T\_{scanKeys}() = 32250.4 \ \mu s $$
+
 
 
 
