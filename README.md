@@ -29,7 +29,10 @@
 
 #### 1.3 Display User Interface
 
-#### 1.4 Knob Integration
+#### 1.4 Knob Detection
+
+#### 1.5 Sound Generation
+
 
 
   ### [2 Real-Time Programming](report/real_time_programming.md)
