@@ -114,9 +114,23 @@
 
 ## 4.2 Automatic octave adjustments across multiple boards
 
+In the music synthesizer, we implemented automatic octave detection across multiple boards by detecting the position of the connected boards using a technique called "east and west detect".
+
+This technique involved connecting multiple synthesizer boards together and using a communication protocol to detect the position of each board in the chain. Each board was equipped with a set of east and west detect pins that were connected to the adjacent board's east and west detect pins.
+
+When a board was connected to another board, it would detect the presence of the adjacent board by checking the voltage levels on the east and west detect pins. This information was then used to determine the position of the board in the chain and adjust the octave accordingly.
+
 ## 4.3 Advanced Waveforms
+
+In the music synthesizer, we used a look-up table (LUT) to create sine waves. A LUT is a pre-calculated table of values that can be accessed at runtime to avoid the need for complex mathematical calculations.
+
+To create a sine wave LUT, we first calculated the values of sine function at regular intervals (e.g. every degree or every radian) and stored them in an array. We could then use this LUT to generate a sine wave by reading the appropriate value from the array at each sample point in time.
+
+To create sawtooth and square waves using a LUT, we can use a similar technique. For sawtooth waves, we can create a ramp function LUT that increases linearly from 0 to 1 and then resets to 0, and then use this to generate a sawtooth wave by reading the appropriate value from the array at each sample point in time. For square waves, we can create a step function LUT that toggles between 0 and 1, and then use this to generate a square wave by reading the appropriate value from the array at each sample point in time.
+
+In addition, we only store half of the sine wave LUT since it is an odd function, meaning that the values in the second half of the LUT are simply the negative values of the first half. This allows us to minimize the memory usage of the LUT without sacrificing the accuracy of the waveform.
 
 ## 4.4 Polyphony 
 
-Polyphony means the generation of multiple waves and summing them together. This allows for multiple waves to be played at the same time. It is important to implement this feature without dynamically scaling the amplitude to ensure that the output is not too large. This can be achieved by clipping the output.
+To implement polyphony in the music synthesizer, we added different waveforms together to create a richer and more complex sound. This was achieved using a technique called additive synthesis, where multiple waveforms were combined to create a single, more complex waveform. The implementation of polyphony allowed for the playing of multiple notes or voices simultaneously, with each voice assigned a different waveform, envelope, and other parameters, resulting in complex and expressive musical textures.
 
