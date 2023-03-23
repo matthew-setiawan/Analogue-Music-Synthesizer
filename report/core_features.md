@@ -27,7 +27,35 @@ msgOut[3] = knobCount[0];//sending wavetype
 
 ## 1.2 Note Detection and Playing
 
-Note detection was achieved by scanning the key buttons 
+### 1.2.1 Reading Keys
+
+Prior to note detection we could read weather each key was being pressed by adjusting RA2, RA1 and RA0 and reading the pins accordingly. These values were used to create a 12-bit integer (keyVal) which stores data on all keys being pressed like the following:
+
+```
+uint32_t retval = 0;
+//GET C-D#
+this->writePins(0,0,0,1);
+retval += digitalRead(C0_PIN)<<11;
+retval += digitalRead(C1_PIN)<<10;
+retval += digitalRead(C2_PIN)<<9;
+retval += digitalRead(C3_PIN)<<8;
+
+//GET E-G
+this->writePins(1,0,0,1);
+delayMicroseconds(3);
+retval += digitalRead(C0_PIN)<<7;
+retval += digitalRead(C1_PIN)<<6;
+retval += digitalRead(C2_PIN)<<5;
+retval += digitalRead(C3_PIN)<<4;
+
+//GET C-D#
+this->writePins(0,1,0,1);
+delayMicroseconds(3);
+retval += digitalRead(C0_PIN)<<3;
+retval += digitalRead(C1_PIN)<<2;
+retval += digitalRead(C2_PIN)<<1;
+retval += digitalRead(C3_PIN)<<0;
+```
 
 ## 1.3 Knob Integration
 
