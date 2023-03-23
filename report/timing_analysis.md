@@ -86,23 +86,38 @@ $$ Tn_{scanKeys()} =T_{CAN\_TX()}/T_{scanKeys()}\ =150/50=\ 3\  $$
 
 $$ Tn_{displayUpdate()} =T_{CAN\_TX()}/T_{displayUpdate()}\ =150/100=\ 1.5 --> 2\  $$ 
 
+$$ Tn_{decodeTask()} = T_{CAN\_TX()}/T_{decodeTask()} = 150/25.2 = 5.952 -> 6 $$
 
-
-
-
-Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline)
+Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask() deadline, 2 tasks of displayUpdate, and 3 tasks of decodeTask() in the relevant CAN_TX deadline.    
 
 ### 3.2.5 Latency Calculation
 
 $$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
-$$ \ \ \ \ =\ \ 198+154.1+2\ast(15826)+3\ast(82.0)=\ 32250.4\ \mu s $$
+$$ \ \ \ \ =\ \ 198+6*154.1+2\ast(15826)+3\ast(82.0)=\ 33475.0\ \mu s $$
 
-According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis. 32.2504<150ms which corresponds to the deadline of lowest priority CAN_TX_TASK(). There should be sufficient time for the tasks to occur. Additionally, we can see that this is also significantly lower than the time for displayUpdate() deadline.
+According to the latency calculation of the critical instant, we can observe how which results in the code being relatively safe according to time constraint requirements and critical timing path analysis. 33.475<150ms which corresponds to the deadline of lowest priority CAN_TX_TASK(). There should be sufficient time for the tasks to occur. Additionally, we can see that this is also significantly lower than the time for displayUpdate() deadline.
 
 ## 3.3 CPU Memory and Utilization
 
-### 3.3.1 Stack Size Utilization
+### 3.3.1 CPU Utilization
+
+When considering the CPU utilisation, we assume that vTask scheduler can run all tasks in parallel and we can calculate the CPU utilisation by examining the execution times. We also consider the rate monotic scheduling system and priorities assigned to estimate this statistic: 
+
+$$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ Time_i} [1] $$
+
+Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
+
+
+$$ \sum\limits_{i=1}^n \text{Execution Time}\_i = T\_{CAN\_TX}() + 6*T\_{decode}() + 2*T\_{displayUpdate}() + 3 * T\_{scanKeys}() = 33.475 \ \mu s $$
+
+
+Utilization = 33.475/150 = 22.31% (for a critical instant -- this was ascertained ).  
+
+The overall CPU utilization statistic supports how the CPU is capable of comfortably executing all tasks by the deadline with potential leeway to add more tasks to the scheduler. However, there are some further considerations that may need to be observed. When timing this code, we do not explicitly wait for a free mailbox in CAN_TX_TASK (). Therefore, it is necessary and expected for our current CPU utilisation to be lower than in the real-time operating system. 
+
+
+### 3.3.2 Stack Size Utilization
 
 The stack size of a task affects CPU utilisation by determining the amount of memory reserved for each task to store function call information and local variables. Small stack sizes may lead to memory-related issues, while a large stack size wastes valuable memory resources. The optimal stack size maximizes CPU utilisation by balancing the number of available stacks and task switching overhead. 
 
@@ -112,23 +127,6 @@ Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1
 
 This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
 
-### 3.3.2 CPU Utilization
-
-When considering the CPU utilisation, we assume that vTask scheduler can run all tasks in parallel and we can calculate the CPU utilisation by examining the execution times. We also consider the rate monotic scheduling system and priorities assigned to estimate this statistic: 
-
-$$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ Time_i} [1] $$
-
-Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
-
-
-$$ \sum\limits_{i=1}^n \text{Execution Time}\_i = T\_{CAN\_TX}() + T\_{decode}() + 2*T\_{displayUpdate}() + 3 * T\_{scanKeys}() = 32250.4 \ \mu s $$
-
-
-
-
-Utilization = 32.2504/150 = 21.50% (for a critical instant).  
-
-The overall CPU utilization statistic supports how the CPU is capable of comfortably executing all tasks by the deadline with potential leeway to add more tasks to the scheduler. However, there are some further considerations that may need to be observed. When timing this code, we do not explicitly wait for a free mailbox in CAN_TX_TASK (). Therefore, it is necessary and expected for our current CPU utilisation to be lower than in the real-time operating system. 
 
 
 ## 3.4 Real World Timing Statistics
