@@ -18,6 +18,8 @@
 
 https://user-images.githubusercontent.com/73653114/227353593-7abeff7f-748b-4faa-bd77-fdd3d0ba49ce.mp4
 
+Watch video on chrome or visit https://youtu.be/owqWthv3Ao0 to watch video on youtube.
+
 
   
   # Report
