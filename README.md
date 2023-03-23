@@ -74,13 +74,9 @@
   
 #### 4.1 Handshaking and auto detection for multiple boards
 
-#### 4.2 Automatic octave adjustments across multiple boards
+#### 4.2 Advanced Waveforms
 
-#### 4.3 Advanced Waveforms
-
-#### 4.4 Polyphony 
-
-#### 4.5 Keyboard Autodetect 
+#### 4.3 Polyphony 
 
 
   ### Appendix
