@@ -53,7 +53,11 @@ Table 1 below shows how thread safety was implemented on a system level.
  
  
 ### 2.2.2 Interrupts 
-
+A series of interrupts were needed for the coursework to ensure that the tasks could be run synchronously in parallel and in a time performant manner. The interrupts included doing a series of sampleISR interrupts as needed to examine the overall state of the system and monitor changes that occur. Specifically, we have a total of 4 possible interrupt routines including: 
+- SampleISR interrupt for playing sounds, this allows voltages to be changed accordingly to enable sounds corresponding to the sawtooth and sine wave output waves to be relevantly generated. ScanKeyTask() will use the SampleISR interrupt as shown in dependency diagram. 
+- CAN_REGISTER_RX ISR, this has the effect of receiving messages and writing these message values into a queue in the ISR which receives data from other tasks. Meanwhile, the decodeTask() will use the ISR to process the relevant messages in queue. 
+- CAN_TX_ISR() : This is necessary for tracking number of output slots usable by CAN_TX and is done through the use of semaphores.  
+ 
 ### 2.2.3 Minimize Memory Usage
 
 To reduce CPU utilization, our group considered the storage and access of variables within the system.   
