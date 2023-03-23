@@ -10,7 +10,7 @@ The objective of this project was to establish reliable communication between on
 
 ## 1.1.1 Sending Notes
 
-Each value in the 
+Each value in msgOut was limited to 8 bits, since there was 12 notes we needed to use two indexs to store note values. Since notes being played (keyVal) was stored as a 12-bit integer of maximum size 4095, we simply made ```msgOut[4] = keyVal/100;``` and ```msgOut[4] = keyVal%100;```
 
 ## 1.1.2 Sending Volume, Octave and Wave Type
 
