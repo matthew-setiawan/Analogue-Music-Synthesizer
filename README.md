@@ -11,7 +11,7 @@
 
   ## Connecting an additional Board
   - Warning: before connecting boards with each other make sure that they are all set as slaves or one set as master. If two or more boards are set as master accidently use yellow reset button to reset boards.
-  - Upon connection as slaves, set the middle board as master. You will notice the octaves and volumes of left and/or right boards changing respective to the master keyboard, you will also notice the keys being played on the master will also be sent and played by the slaves.
+  - Upon connection as slaves, set the middle board to master. You will notice the octaves and volumes of left and/or right boards changing respective to the master keyboard, you will also notice the keys being played on the master will also be sent and played by the slaves.
 
   # Report
   
