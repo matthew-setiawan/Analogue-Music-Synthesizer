@@ -43,6 +43,7 @@ Table 1 below shows how thread safety was implemented on a system level.
 | masteroct     | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
 | masterwave    | uint32_t             | scanKeysTask         | decodeTask                              | Regular access      |
 | stepSizes     | 1D array of uint32_t | sampleISR            |                                         | Regular access      |
+| recvkey     | uint32_t | sampleISR            | decodeTask                                        | Atomic Store     |
 
 
   <p align="center">
