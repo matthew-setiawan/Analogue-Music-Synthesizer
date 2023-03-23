@@ -15,8 +15,7 @@
   
   ## Video
   
-  <iframe width="715" height="402" src="https://www.youtube.com/embed/MiLZXhW4XqU" title="Joe Rogan on How Weed Affects Disciplined People | ft Dr. Andrew Huberman" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
- 
+ <iframe src="PEN-URL" width="100%" height="500"></iframe>
 
   # Report
   
