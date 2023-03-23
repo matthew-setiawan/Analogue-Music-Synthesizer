@@ -72,7 +72,7 @@
 
 ### [4 Advanced Features](report/advanced_features.md)
   
-#### 4.1 Handshaking and auto detection for multiple boards
+#### 4.1 Automatic octave adjustments across multiple boards
 
 #### 4.2 Advanced Waveforms
 
