@@ -61,8 +61,7 @@ Considering that the queue has a total length of 36, we can therefore assume the
 
 $$ Aggregated-deadline=Queue_{size} \ast CAN_{Task(Deadline)}\ =36\ast(50)\/12=150ms  $$
 
-
-Likewise, for the decode task, the queue length is the same size and hence we will have a maximal aggregated interval of 150 ms.
+Likewise, for the decode task, the queue length is 36 and CAN messages can be sent at a rate of 0.7ms per message. 
 
 ### 3.2.3 Timing Analysis
 
@@ -72,10 +71,12 @@ After determining the interruptions and measured time per task, the following ta
 | --- | --- | --- | --- |
 | scanKeys() | 50 | 82.0 | 2 |
 | displayUpdate() | 100 | 15826 | 1 |
-| CAN\_TX() | 150 | 198.0 | 1 |
-| decode() | 150 | 154.1 | 1 |
+| CAN\_TX()* | 150 | 198.0 | 1 |
+| decode()* | 25.2 | 154.1 | 1 |
 
-When considering the priority of the following tasks the analysis is the same for all 3 of the displayTask() for 36 intervals, CAN\_TX\_TASK() for 36 intervals, and decodeTask() as they have equal initiation times and are all lowest priority tasks. The decision to do this was because it is important to ensure that display can be adequately handled to provide an essential user-interface, and this is equally important as CAN\_TX\_TASK() and decodeTask(). CAN and decodeTask() are important too as we need to ensure that sound can be broadcasted to different speakers.
+* The executing and initiation times for the decode and CAN_TX task are averaged across 36 iterations. 
+
+From the above table we can see that the priority assigned is the same for all 3 of the displayTask(), CAN\_TX\_TASK(), and decodeTask(). The decision to do this was because it is important to ensure that display can be adequately handled to provide an essential user-interface, and this is equally important as CAN\_TX\_TASK() and decodeTask(). CAN and decodeTask() are important too as we need to ensure that sound can be broadcasted to different speakers. We decided to base our analysis on the task with CAN_TX_TASK() as this is the one with longest deadline and hence means that other tasks will occur more than once at each iteration. It will also provide the largest CPU utilization and toughet deadline to meet theoretically. as they have equal initiation times and are all lowest priority tasks. 
 
 ### 3.2.4 Scan Key Task Timing
 
@@ -84,6 +85,8 @@ We can conduct a timing analysis for the Scan Key Task and Display Update Task a
 $$ Tn_{scanKeys()} =T_{CAN\_TX()}/T_{scanKeys()}\ =150/50=\ 3\  $$ 
 
 $$ Tn_{displayUpdate()} =T_{CAN\_TX()}/T_{displayUpdate()}\ =150/100=\ 1.5 --> 2\  $$ 
+
+
 
 
 
