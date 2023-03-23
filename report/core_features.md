@@ -13,7 +13,7 @@ The objective of this project was to establish reliable communication between on
 Each value in msgOut was limited to 8 bits, since there was 12 notes we needed to use two indexs to store note values. Since notes being played (keyVal) was stored as a 12-bit integer of maximum size 4095 we used the following 2 indexs to define the notes played:
 ```
 msgOut[4] = keyVal/100;
-msgOut[4] = keyVal%100;
+msgOut[5] = keyVal%100;
 ```
 
 ## 1.1.2 Sending Volume, Octave and Wave Type
@@ -27,7 +27,7 @@ msgOut[3] = knobCount[0];//sending wavetype
 
 ## 1.2 Note Detection and Playing
 
-Note detection is achieved by continuously scanning a key matrix to find out which keys are pressed. This allows for a smaller number of microcontroller pins to be able to detect all keys. 
+Note detection was achieved by scanning the key buttons 
 
 ## 1.3 Knob Integration
 
