@@ -14,6 +14,8 @@
   - Upon connection as slaves, set the middle board to master. You will notice the octaves and volumes of left and/or right boards changing respective to the master keyboard, you will also notice the keys being played on the master will also be sent and played by the slaves.
   
   ## Video
+  
+  
 
   # Report
   
