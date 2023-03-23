@@ -12,7 +12,7 @@
   | West     | 5    | 3      |
   | East     | 6    | 3      |
 
-Using this method, we could automatically detect if the master was at the left or right of the board. This information was then used to adjust the octave accordingly (make octave lower when it's a left slave and higher otherwise).
+Using this method, we could automatically detect if the master was at the left or right of the board. This information was then used to adjust the octave accordingly (make octave one magnitude lower than master if on the left and one magnitude higher if on the right). Given that we are transmitting octave values from the master, we can apply this translation of the given octave value.
 
 ## 4.2 Advanced Waveforms
 
