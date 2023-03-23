@@ -123,7 +123,19 @@ We first calculate the total stack size used by all tasks: 64 + 256 + 32 + 32 = 
 
 Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1536 bytes. 
 
-This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. From further inspection, we discovered that the overall RAM used was determined to be 18% while the flash memory utilized a memory of  
+This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
+
+## Obtaining Statistics from Operating System
+From further inspection, we discovered that the overall RAM used was determined to be 18% while the flash memory utilized was determined as a total of 210 kb as obtained from the FREERTOS operating system. This is indicative that the RAM utiliation is relatively low suggesting that the CPU can handle the tasks in a relatively reliable and efficient manner. Meanwhile, the flash memory is relatively low but takes about 82% of the overall utilization. 
+<p align="center">
+<img src="/Images/deadlines.png" width="400" alt="Figure 3: CPU Utilization Observed from FreeRTOS System">
+  
+  <p align="center">
+    <em>
+Figure 3: CPU Utilization Observed from FreeRTOS System
+    </em>
+ </p>
+</p>
 
 
 ## 3.4 Real World Timing Statistics
@@ -132,11 +144,11 @@ When the real-time operating system is running, we decided to consider a realist
 
 
 <p align="center">
-<img src="/Images/figure-3.jpg" width="400" alt="Figure 3: Task utilization statistics from FreeRTOS">
+<img src="/Images/figure-3.jpg" width="400" alt="Figure 4: Task utilization statistics from FreeRTOS">
   
   <p align="center">
     <em>
-Figure 3: Task utilization statistics from FreeRTOS
+Figure 4: Task utilization statistics from FreeRTOS
     </em>
  </p>
 </p>
