@@ -109,7 +109,7 @@ $$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ 
 Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
 
 
-$$ \sum_{i=1}^n \text{Execution Time}_i = T_{\text{CAN\_TX}}() + 6 \cdot T_{\text{decode}}() + 2 \cdot T_{\text{displayUpdate}}() + 3 \cdot T_{\text{scanKeys}}() = 33.475 \ \mu s $$ 
+$$ \sum\limits_{i=1}^n \text{Execution Time}_{i} = T_{\text{CAN\_TX}}() + 6 \cdot T_{\text{decode}}() + 2 \cdot T_{\text{displayUpdate}}() + 3 \cdot T_{\text{scanKeys}}() = 33.475 \ \mu s $$ 
 
 
 Utilization = 33.475/150 = 22.31% (for a critical instant -- this was ascertained ).  
