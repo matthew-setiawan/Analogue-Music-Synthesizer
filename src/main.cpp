@@ -3,7 +3,6 @@
 #include <string>
 #include <iostream>
 #include <map>
-#include <bitset>
 #include <STM32FreeRTOS.h>
 #include <ES_CAN.h>
 
@@ -93,15 +92,6 @@ void setOutMuxBit(const uint8_t bitIdx, const bool value) {
       digitalWrite(REN_PIN,HIGH);
       delayMicroseconds(2);
       digitalWrite(REN_PIN,LOW);
-}
-
-const char* intToBinaryString(int value) {
-    static char buffer[13];  // Allocate a buffer to hold the binary string
-    std::bitset<12> bits((value & 0xFFF));  // Mask the last 12 bits and convert to binary format
-    std::string binaryString = bits.to_string();  // Convert the binary format to a std::string
-    binaryString.copy(buffer, sizeof(buffer));  // Copy the std::string to the buffer
-    buffer[sizeof(buffer) - 1] = '\0';  // Add a null terminator to the end of the buffer
-    return buffer;  // Return the binary string as a const char*
 }
 
 class readBoard{
