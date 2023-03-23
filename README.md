@@ -25,7 +25,15 @@
 
 #### 1.1 CAN Communication
 
+##### 1.1.1 Sending Notes
+
+##### 1.1.2 Sending Volume, Octave and Wave Type
+
 #### 1.2 Note Detection
+
+#### 1.2.1 Reading Keys
+
+#### 1.2.2 Reading keyVal and playing sound
 
 #### 1.3 Display User Interface
 
