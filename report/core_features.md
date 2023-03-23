@@ -66,12 +66,16 @@ const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68
 
 ## 1.3 Knob Integration
 
-There are four knobs on the device. Two of these were set up to allow for the adjustment of the volume and the octave of the sound played by the device. The knob integration is achieved through the same key matrix.
+There are four knobs on the device. Knob 1 is used to select the waveform, knob 2 to determine master/slave, knob 3 to adjust the octave, and knob 4 to adjust the volume. The knobs were obtained similarly to reading the keys in 1.2.1. However, we had to keep track of changes in the knob states to determine whether the knob was moving left, right, or idle.
 
 ## 1.4 Display User Interface
 
-An OLED display is readily available on the device. This is set up to display information on the volume, octave and the current keys pressed on the device.
+An OLED display is readily available on the device. This display identifies the keys being played, waveform type, master/slave configuration, volume and octave of each board.
 
 ## 1.5 Sound Generation
 
-Based on the keys pressed and the parameters set by the knobs, the desired note is played. Internally, is is represented by a sawtooth function with a sample rate of 22 kHz.
+Based on the voltage obtained with process 1.2.2, we simply used the following code which sets the voltage with Vres (sum of waveforms of keys being played): 
+
+```
+analogWrite(OUTR_PIN, ((Vres+128))>>vol);
+```
