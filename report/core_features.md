@@ -10,11 +10,16 @@ The objective of this project was to establish reliable communication between on
 
 ## 1.1.1 Sending Notes
 
-Each value in msgOut was limited to 8 bits, since there was 12 notes we needed to use two indexs to store note values. Since notes being played (keyVal) was stored as a 12-bit integer of maximum size 4095, we simply made ```msgOut[4] = keyVal/100;``` and ```msgOut[4] = keyVal%100;```
+Each value in msgOut was limited to 8 bits, since there was 12 notes we needed to use two indexs to store note values. Since notes being played (keyVal) was stored as a 12-bit integer of maximum size 4095, we simply made ```msgOut[4] = keyVal/100;``` and ```msgOut[4] = keyVal%100;```, and similarly converted it back into one integer as a reciever.
 
 ## 1.1.2 Sending Volume, Octave and Wave Type
 
-This is to facilitate communication and deployment across separate keyboards. CAN Messages are sent which contain information comprising of octave and volume details which are synchronized in state. 
+Sending volume, octave and wave types were more trivial as the values are much lower. We simply specified the following:
+```
+msgOut[1] = knobCount[2];//sending octave
+msgOut[2] = knobCount[3];//sending volume
+msgOut[3] = knobCount[0];//sending wavetype
+```
 
 ## 1.2 Note Detection and Playing
 
