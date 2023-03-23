@@ -5,7 +5,8 @@ To evaluate the reliability of our system, it was necessary to conduct data anal
 
 ### 3.1 Methodology
 
-To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for. 
+To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.However, for CAN_RX tasks this .This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for. When we tim
+
 Figure 1 and 2 demonstrate the timing analysis of tasks in the system.
 
 
@@ -55,7 +56,7 @@ Primarily the deadline for this task is defined as follows
 
 $$ CAN_{TASK(deadline)}\ =(scan_{key_deadline\ })/(num_keys\ )=50ms/12=\ 4.167\ ms\  $$
 
-This refers to the maximum allowable time for each CAN transmission.
+This refers to the maximum allowable time for each CAN transmission .
 
 Considering that the queue has a total length of 36, we can therefore assume the maximum time allowable for this task to be aggregated across 36 executions.
 
@@ -74,7 +75,7 @@ After determining the interruptions and measured time per task, the following ta
 | CAN\_TX()* | 150 | 198.0 | 1 |
 | decode()* | 25.2 | 154.1 | 1 |
 
-* The executing and initiation times for the decode and CAN_TX task are averaged across 36 iterations. 
+*The executing and initiation times for the decode and CAN_TX task take the worst case scenario where there needs to be 36 messages placed into the queue to facilitate timing. This is the worst case scenario as the queue length is of size 36 and in practice should never occur. 
 
 From the above table we can see that the priority assigned is the same for all 3 of the displayTask(), CAN\_TX\_TASK(), and decodeTask(). The decision to do this was because it is important to ensure that display can be adequately handled to provide an essential user-interface, and this is equally important as CAN\_TX\_TASK() and decodeTask(). CAN and decodeTask() are important too as we need to ensure that sound can be broadcasted to different speakers. We decided to base our analysis on the task with CAN_TX_TASK() as this is the one with longest deadline and hence means that other tasks will occur more than once at each iteration. It will also provide the largest CPU utilization and toughet deadline to meet theoretically. as they have equal initiation times and are all lowest priority tasks. 
 
