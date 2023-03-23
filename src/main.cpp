@@ -285,22 +285,33 @@ void displayUpdateTask(void * pvParameters){
     //Master/Slave Screen Message
     string state;
     if(knobCount[1] == 1){
-      state = "sender(master)";
+      state = "master(s)";
     }
     else{
-      state = "reciever";
+      state = "slave(r)";
     }
 
     //Wave Type Screen Message
     string wave;
+    wave = "Wave: ";
+    u8g2.drawStr(2,20,(wave).c_str());
     if(knobCount[0] == 0){
-      wave = "sine";
+      u8g2.drawCircle(40, 16, 3, U8G2_DRAW_UPPER_LEFT);
+      u8g2.drawCircle(40, 16, 3, U8G2_DRAW_UPPER_RIGHT);
+      u8g2.drawCircle(46, 16, 3, U8G2_DRAW_LOWER_LEFT);
+      u8g2.drawCircle(46, 16, 3, U8G2_DRAW_LOWER_RIGHT);
     }
     else if(knobCount[0] == 1){
-      wave = "square";
+      u8g2.drawLine(37, 16, 37, 13);
+      u8g2.drawLine(37, 13, 43, 13);
+      u8g2.drawLine(43, 13, 43, 19);
+      u8g2.drawLine(43, 19, 49, 19);
+      u8g2.drawLine(49, 19, 49, 16);
     }
     else{
-      wave = "saw";
+      u8g2.drawLine(37, 16, 43, 13);
+      u8g2.drawLine(43, 13, 43, 19);
+      u8g2.drawLine(43, 19, 49, 16);
     }
     string pressedkey = "";
     int tempkeyVal1 = keyVal;
@@ -312,10 +323,14 @@ void displayUpdateTask(void * pvParameters){
       tempkeyVal1 = tempkeyVal1/2;
       tempkeyVal2 = tempkeyVal2/2;
     }
-
-    u8g2.drawStr(2,10,(state+" | "+wave).c_str());
-    u8g2.drawStr(2,20,("Pressed Key: "+pressedkey).c_str());
-    u8g2.drawStr(2,30,("Volume: "+to_string(8-knobCount[3])+"|"+"Octave: "+to_string(knobCount[2])).c_str());
+    u8g2.setFontMode(0);
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(70,20,(state).c_str());
+    u8g2.setFontMode(1);
+    u8g2.setFont(u8g2_font_ncenB08_tr);
+    u8g2.drawStr(2,10,("Keys: "+pressedkey).c_str());
+    u8g2.drawStr(2,30,("Vol: "+to_string(8-knobCount[3])).c_str());
+    u8g2.drawStr(70,30,("Octave: "+to_string(8-knobCount[2])).c_str());
     xSemaphoreGive(keyArrayMutex);
     u8g2.setCursor(2,20);
     u8g2.sendBuffer();
