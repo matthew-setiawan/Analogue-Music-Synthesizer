@@ -46,7 +46,6 @@ const uint32_t interval = 100; //Display update interval
 int32_t recvkey = 4095;
 
 //Pressed Key
-string pressedkey = "";
 std::map<int, std::string> intToKey = {{0, "C"}, {1, "C#"}, {2, "D"}, {3, "D#"}, {4, "E"}, {5, "F"}, {6, "F#"}, {7, "G"}, {8, "G#"}, {9, "A"}, {10, "A#"}, {11, "B"}};
 
 //Pin definitions
@@ -118,13 +117,13 @@ class readBoard{
     digitalWrite(RA1_PIN, ra1);
     digitalWrite(RA2_PIN, ra2);
     digitalWrite(REN_PIN, ren);
+    delayMicroseconds(10);
   }
 
   uint32_t readKeys(){
     uint32_t retval = 0;
     //GET C-D#
     this->writePins(0,0,0,1);
-    delayMicroseconds(3);
     retval += digitalRead(C0_PIN)<<11;
     retval += digitalRead(C1_PIN)<<10;
     retval += digitalRead(C2_PIN)<<9;
@@ -220,7 +219,6 @@ int rightleftdetect(){
 }
 
 void sampleISR(){
-  pressedkey = "";
   static uint32_t time = 0;
   uint32_t Vout;
   uint32_t zeroCount = 0;
@@ -228,7 +226,7 @@ void sampleISR(){
   int tempkeyVal = keyVal;
   for(int i=11;i>=0;i--){
     if(tempkeyVal%2==0){
-      pressedkey = intToKey[i];
+      //if(zeroCount<4){pressedkey = pressedkey+intToKey[i];}
       u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount[2])*time)>>22)%360;
       if(index>=180){
         Vfinal += -wavearr[knobCount[0]][(index-180)>>1];
@@ -245,7 +243,7 @@ void sampleISR(){
   tempkeyVal = recvkey;
   for(int i=11;i>=0;i--){
     if(tempkeyVal%2==0){
-      pressedkey = intToKey[i];
+      //if(zeroCount<4){pressedkey = pressedkey+intToKey[i];}
       u_int32_t index = ((((stepSizes[i+1]<<2)>>(knobCount[2]+(-2*leftpos+1)))*time)>>22)%360;
       if(index>=180){
         Vfinal_master += -wavearr[knobCount[0]][(index-180)>>1];
@@ -315,6 +313,16 @@ void displayUpdateTask(void * pvParameters){
     }
     else{
       wave = "saw";
+    }
+    string pressedkey = "";
+    int tempkeyVal1 = keyVal;
+    int tempkeyVal2 = recvkey;
+    for(int i=11;i>=0;i--){
+      if(tempkeyVal1%2==0||tempkeyVal2%2==0){
+        pressedkey = intToKey[i]+pressedkey;
+      }
+      tempkeyVal1 = tempkeyVal1/2;
+      tempkeyVal2 = tempkeyVal2/2;
     }
 
     u8g2.drawStr(2,10,(state+" | "+wave).c_str());
