@@ -83,42 +83,12 @@
   | West     | 5    | 3      |
   | East     | 6    | 3      |
     
-### Auto detection
-  For a two or three module keyboard, you can determine the location of each module just by switching on all the handshake outputs and reading the inputs.
-  The modules at each end will detect just one input from adjacent modules, while the centre module will detect two.
-  You may need to broadcast a CAN message from the centre module to announce that it is a three module keyboard, not two.
-  
-  Four or more modules is more complex because there are multiple centre modules. On startup, you can do something like this:
-  1. Get a unique ID for the module.
-  You can use the microcontroller's built-in, 96-bit ID, which is accessed through the HAL functions `HAL_GetUIDw0()`, `HAL_GetUIDw1()` and `HAL_GetUIDw2()`. It consists of a few different fields, some binary, some ASCII. You may want to generate a hash to get a smaller data type.
-  2. At startup, set both handshake outputs (west and east) high (on)
-  3. Wait long enough for all the other modules to start and switch on their handshake outputs
-  4. Read the handshake inputs. Is the west input high (off)? If so:
-     - This is the most westerely module (position 0)
-     - If the east input is also high (off), it is the only module, so end handshaking here
-     - Broadcast a handshaking message on the CAN bus that starts with a predefined symbol for handshaking and contains this module's ID and position (0)
-     - Set the east handshake signal low (off)
-  5. If the module is not the most westerly, it must wait for handshaking messages on the CAN bus and for the west handshake input to change:
-     - Record the ID and position of each module that sends a message
-     - Has the west handshake input has changed to high (off)? If so:
-       - This module's position is one greater than the position of the previous message
-       - Broadcast a new handshaking message and set the east handshake output low (off)
-       - If this module is the most easterly, send another CAN message to indicate handshaking complete
-
-  Once handshaking is complete, each module will contain a data structure listing the ID and position of every module.
-  This can be used to set up the role and octave number of each module.
-  
-  You may wish to consider live plugging and unplugging of modules as well as detecting a static configuration. One way you could do this is to hold all the handshake outputs high during normal operation. If any module detects a neighbour connecting or disconnecting, it can broadcast a CAN message that triggers a new auto-detection sequence.
-
-
 
 ## 4.2 Automatic octave adjustments across multiple boards
 
-In the music synthesizer, we implemented automatic octave detection across multiple boards by detecting the position of the connected boards using a technique called "east and west detect".
+In the music synthesizer, we implemented automatic octave detection across multiple boards by detecting the position of the connected boards using the inputs in the method explained above.
 
-This technique involved connecting multiple synthesizer boards together and using a communication protocol to detect the position of each board in the chain. Each board was equipped with a set of east and west detect pins that were connected to the adjacent board's east and west detect pins.
-
-When a board was connected to another board, it would detect the presence of the adjacent board by checking the voltage levels on the east and west detect pins. This information was then used to determine the position of the board in the chain and adjust the octave accordingly.
+When a board was connected to another board, it would detect the presence of the adjacent board by checking the voltage levels on the east and west detect pins. This information was then used to determine the position of the board in the chain and adjust the octave accordingly (make octave lower when it's a left slave and higher otherwise).
 
 ## 4.3 Advanced Waveforms
 
