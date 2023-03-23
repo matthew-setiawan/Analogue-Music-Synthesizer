@@ -64,7 +64,7 @@ We used a simple loop to iterate through bits of keyVal and find out which notes
 const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68178701,72231589,76528508,81077269,85899346,91006452,96418111};
 ```
 
-## 1.3 Knob Integration
+## 1.3 Knob Detection
 
 There are four knobs on the device. Knob 1 is used to select the waveform, knob 2 to determine master/slave, knob 3 to adjust the octave, and knob 4 to adjust the volume. The knobs were obtained similarly to reading the keys in 1.2.1. However, we had to keep track of changes in the knob states to determine whether the knob was moving left, right, or idle.
 
