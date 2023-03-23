@@ -61,7 +61,7 @@ A series of interrupts were needed for the coursework to ensure that the tasks c
  
 ### 2.2.3 Minimize Memory Usage
 
-To reduce CPU utilization, our group considered the storage and access of variables within the system.   
+To reduce CPU memory utilization, our group considered the storage and access of variables within the system. Firstly, all our variables should be initialized with suitable data types that shouldn't take more storage than needed.  
 
 For our scankeyTask() we used an integer variable to store the scanned key values instead of an array. Implementing an array for this task would require a memory allocation equivalent to a total of 12 integer value as necessary to store all keys. However, using a 1 hot encoding process would be spatially inefficient in our system and as such we opted to store the scankey() state in an integer instead.  
 
