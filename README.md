@@ -7,7 +7,7 @@
   
   ## Configuring a Board
   - Boards are set to slaves/recievers by default which are unable to edit their volume, wave or octave
-  - Twist second knob to the left to make this a master/sender board then you can edit volume, wave and octaves using knob 1, 3 and 4 respectively.
+  - Twist 2nd knob to the left to make this a master/sender board then you can edit volume, wave and octaves using knobs 1, 3 and 4 respectively.
 
   ## Connecting an additional Board
   - Warning: before connecting boards with each other make sure that they are all set as slaves or one set as master. If two or more boards are set as master accidently use yellow reset button to reset boards.
