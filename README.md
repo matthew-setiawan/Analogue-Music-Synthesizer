@@ -1,7 +1,7 @@
 # Analogue-Music-Synthesizer - Embedded Systems Coursework 2
 
   # Running The Code
-  Please navigate to the branch 
+  Navigate to https://github.com/matthew-setiawan/Analogue-Music-Synthesizer/tree/main/src to find main.cpp used to upload software to the board.
   
   # Using the Board
   
