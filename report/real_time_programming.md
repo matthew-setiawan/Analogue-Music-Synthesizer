@@ -31,7 +31,7 @@ Thread safety was an imperative consideration for our code development primarily
 Table 1 below shows how thread safety was implemented on a system level.  
 
 | Variable Name | Variable Type        | Read By               | Write By                                | Access Method       |
-| ------------- | --------------------| ---------------------| ---------------------------------------|---------------------|
+| ------------- | --------------------| --------------------------| ----------------------------------|---------------------|
 | msgInQ        | QueueHandle_t        | decodeTask           | CAN_RX_ISR                              | Queue               |
 | msgOutQ       | QueueHandle_t        |                      |                                         | Queue               |
 | leftpos       | bool                 | decodeTask           | displayUpdateTask                       | Regular access      |
