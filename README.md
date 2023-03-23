@@ -80,18 +80,3 @@
 #### 4.2 Advanced Waveforms
 
 #### 4.3 Polyphony 
-
-
-  ### Appendix
-
-  The following projects were used as starting points for this Embedded Systems labs and coursework.
-  
-  [Lab Part 1](report/LabPart1.md)
-  
-  [Lab Part 2](report/LabPart2.md)
-  
-  TO BE REMOVED:
-  
-   ### Data and resource sharing
-  
-  ### Dependencies
