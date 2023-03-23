@@ -52,7 +52,8 @@ Table 1 below shows how thread safety was implemented on a system level.
     </em>
  </p>
  
- 
+In addition to drawing dependency diagrams (which shows the potential for interrupts etc), we utilized the platformIO inspection tools to model the dependencies and potential for code defects. From the defect analysis it appeared that there were no defects visible and present in our code and hence it is demonstrated that      
+
 ### 2.2.2 Interrupts 
 
 A series of interrupts were needed for the coursework to ensure that the tasks could be run synchronously in parallel and in a time performant manner. The interrupts included doing a series of sampleISR interrupts as needed to examine the overall state of the system and monitor changes that occur. Specifically, we have a total of 4 possible interrupt routines including: 
@@ -67,3 +68,4 @@ To reduce CPU memory utilization, our group considered the storage and access of
 For our scankeyTask() we used an integer variable to store the scanned key values instead of an array. Implementing an array for this task would require a memory allocation equivalent to a total of 12 integer value as necessary to store all keys. However, using a 1 hot encoding process would be spatially inefficient in our system and as such we opted to store the scankey() state in an integer instead.  
 
 Additionally, our sine wave table is optimised in terms of spatial requirements. By considering the shape of a sinusoidal wave, we can determine how the absolute values are periodic at a period of Pi. As a result, when considering these waves, we only store 90 sine values in the array to represent the wave tending from 0-pi instead of storing all wave values spanning 0-2pi in period.   
+
