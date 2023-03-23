@@ -125,8 +125,7 @@ We first calculate the total stack size used by all tasks: 64 + 256 + 32 + 32 = 
 
 Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1536 bytes. 
 
-This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
-
+This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. From further inspection, we discovered that the overall RAM used was determined to be 18% while the flash memory utilized a memory of  
 
 
 ## 3.4 Real World Timing Statistics
