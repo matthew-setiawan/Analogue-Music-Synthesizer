@@ -19,8 +19,9 @@ QueueHandle_t msgOutQ;
 volatile bool leftpos = 0;
 
 //Wavearr: 2D arrays containing all different type of waveforms
-u_int32_t wavearr[2][90] = {{0,4,8,13,17,22,26,30,35,39,43,47,52,56,60,63,67,71,75,78,82,85,88,92,95,98,100,103,106,108,110,113,115,116,118,120,121,123,124,125,126,126,127,127,127,128,127,127,127,126,126,125,124,123,121,120,118,116,115,113,110,108,106,103,100,98,95,92,88,85,82,78,75,71,67,63,60,56,52,47,43,39,35,30,26,22,17,13,8,4},
-                          {128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128}};
+int wavearr[3][90] = {{0,4,8,13,17,22,26,30,35,39,43,47,52,56,60,63,67,71,75,78,82,85,88,92,95,98,100,103,106,108,110,113,115,116,118,120,121,123,124,125,126,126,127,127,127,128,127,127,127,126,126,125,124,123,121,120,118,116,115,113,110,108,106,103,100,98,95,92,88,85,82,78,75,71,67,63,60,56,52,47,43,39,35,30,26,22,17,13,8,4},
+                      {128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128,128},
+                      {-128, -124, -122, -118, -116, -112, -110, -108, -104, -102, -98, -96, -92, -90, -88, -84, -82, -78, -76, -72, -70, -68, -64, -62, -58, -56, -54, -50, -48, -44, -42, -38, -36, -34, -30, -28, -24, -22, -18, -16, -14, -10, -8, -4, -2, 0, 2, 4, 8, 10, 14, 16, 18, 22, 24, 28, 30, 34, 36, 38, 42, 44, 48, 50, 54, 56, 58, 62, 64, 68, 70, 72, 76, 78, 82, 84, 88, 90, 92, 96, 98, 102, 104, 108, 110, 112, 116, 118, 122, 124}};
 
 //KnobValueTracking
 volatile uint32_t knobCount[4] = {0,0,2,0};
@@ -41,6 +42,12 @@ const uint32_t stepSizes [] = {0,51076922,54112683,57330004,60740599,64274185,68
 
 //Constants
 const uint32_t interval = 100; //Display update interval
+
+int32_t recvkey = 4095;
+
+//Pressed Key
+string pressedkey = "";
+std::map<int, std::string> intToKey = {{0, "C"}, {1, "C#"}, {2, "D"}, {3, "D#"}, {4, "E"}, {5, "F"}, {6, "F#"}, {7, "G"}, {8, "G#"}, {9, "A"}, {10, "A#"}, {11, "B"}};
 
 //Pin definitions
 //Row select and enable
@@ -142,7 +149,7 @@ class readBoard{
     return retval;
   }
 
-  void readAllKnobs(int ra0, int ra1, int ra2, int ren, int k1, int k2, int bound){
+  void readAllKnobs(int ra0, int ra1, int ra2, int ren, int k1, int k2, int bound1, int bound2){
     uint32_t knob1 = 0;
     uint32_t knob0 = 0;
     this->writePins(ra0,ra1,ra2,ren);
@@ -154,7 +161,7 @@ class readBoard{
     knob1 += digitalRead(C0_PIN)<<1;
     knob1 += digitalRead(C1_PIN)<<0;
 
-    if(((knob0==1 && prevKnob[k1]==0)||(knob0==2 && prevKnob[k1]==3))&&knobCount[k1]<bound){
+    if(((knob0==1 && prevKnob[k1]==0)||(knob0==2 && prevKnob[k1]==3))&&knobCount[k1]<bound1){
       knobCount[k1] += 1;
     }
     else if(((knob0==0 && prevKnob[k1]==1)||(knob0==3 && prevKnob[k1]==2))&&knobCount[k1]>0){
@@ -162,7 +169,7 @@ class readBoard{
     }
     prevKnob[k1] = knob0;
 
-    if(((knob1==1 && prevKnob[k2]==0)||(knob1==2 && prevKnob[k2]==3))&&knobCount[k2]<bound){
+    if(((knob1==1 && prevKnob[k2]==0)||(knob1==2 && prevKnob[k2]==3))&&knobCount[k2]<bound2){
       knobCount[k2] += 1;
     }
     else if(((knob1==0 && prevKnob[k2]==1)||(knob1==3 && prevKnob[k2]==2))&&knobCount[k2]>0){
@@ -172,14 +179,14 @@ class readBoard{
   }
 
   void readKnobs01(){
-    this->readAllKnobs(0,0,1,1,0,1,1);
+    this->readAllKnobs(0,0,1,1,0,1,2,1);
     if(knobCount[1] != 1){
       knobCount[3] = mastervol;
       knobCount[2] = masteroct;
     }
   }
   void readKnobs(){
-    this->readAllKnobs(1,1,0,1,2,3,5);
+    this->readAllKnobs(1,1,0,1,2,3,8,8);
     if(knobCount[1] != 1){
       knobCount[0] = masterwave;
     }
@@ -212,17 +219,17 @@ int rightleftdetect(){
   }
 }
 
-int currentStepCounter = 1;
-
 void sampleISR(){
-  static uint32_t phaseAcc = 0;
+  pressedkey = "";
+  static uint32_t time = 0;
   uint32_t Vout;
   uint32_t zeroCount = 0;
-  uint32_t Vfinal = 0;
+  uint32_t Vfinal = 0;//main keyboard V
   int tempkeyVal = keyVal;
   for(int i=11;i>=0;i--){
     if(tempkeyVal%2==0){
-      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount[2])*phaseAcc)>>22)%360;
+      pressedkey = intToKey[i];
+      u_int32_t index = ((((stepSizes[i+1]<<2)>>knobCount[2])*time)>>22)%360;
       if(index>=180){
         Vfinal += -wavearr[knobCount[0]][(index-180)>>1];
       }
@@ -233,7 +240,25 @@ void sampleISR(){
     }
     tempkeyVal = tempkeyVal/2;
   }
-  phaseAcc += currentStepCounter;
+
+  uint32_t Vfinal_master = 0;//master(sender) keyboard sounds
+  tempkeyVal = recvkey;
+  for(int i=11;i>=0;i--){
+    if(tempkeyVal%2==0){
+      pressedkey = intToKey[i];
+      u_int32_t index = ((((stepSizes[i+1]<<2)>>(knobCount[2]+(-2*leftpos+1)))*time)>>22)%360;
+      if(index>=180){
+        Vfinal_master += -wavearr[knobCount[0]][(index-180)>>1];
+      }
+      else{
+        Vfinal_master += wavearr[knobCount[0]][(index)>>1];
+      }
+      zeroCount += 1;
+    }
+    tempkeyVal = tempkeyVal/2;
+  }
+
+  time += 1;
 
   if(zeroCount < 3){
 
@@ -244,8 +269,8 @@ void sampleISR(){
   else if(zeroCount < 12){
     zeroCount = 4;
   }
-  uint32_t Vres = Vfinal>>zeroCount;
-  analogWrite(OUTR_PIN, ((Vres+128)>>1)>>knobCount[3]);
+  uint32_t Vres = (Vfinal+Vfinal_master)>>zeroCount;
+  analogWrite(OUTR_PIN, ((Vres+128))>>knobCount[3]);
 }
 
 void scanKeysTask(void * pvParameters) {
@@ -274,31 +299,34 @@ void displayUpdateTask(void * pvParameters){
     //Master/Slave Screen Message
     string state;
     if(knobCount[1] == 1){
-      state = "master";
+      state = "sender(master)";
     }
     else{
-      state = "slave";
+      state = "reciever";
     }
 
     //Wave Type Screen Message
     string wave;
     if(knobCount[0] == 0){
-      wave = "Classic";
+      wave = "sine";
+    }
+    else if(knobCount[0] == 1){
+      wave = "square";
     }
     else{
-      wave = "Funky";
+      wave = "saw";
     }
 
     u8g2.drawStr(2,10,(state+" | "+wave).c_str());
-    u8g2.drawStr(2,20,("Volume: "+to_string(5-knobCount[3])).c_str());
-    u8g2.drawStr(2,30,("Octave: "+to_string(knobCount[2])).c_str());
+    u8g2.drawStr(2,20,("Pressed Key: "+pressedkey).c_str());
+    u8g2.drawStr(2,30,("Volume: "+to_string(8-knobCount[3])+"|"+"Octave: "+to_string(knobCount[2])).c_str());
     xSemaphoreGive(keyArrayMutex);
     u8g2.setCursor(2,20);
     u8g2.sendBuffer();
     rightleftdetect();
+
   }
 }
-int32_t recvmsg = 0;
 void decodeTask(void *pvParameters)
 {
   int8_t misses = 0; // Checks how many times middle CAN has been missed
@@ -312,8 +340,9 @@ void decodeTask(void *pvParameters)
       mastervol = RX_Message_local[2];
       masteroct = RX_Message_local[1] + 1;
       masterwave = RX_Message_local[3];
+      __atomic_store_n(&recvkey, RX_Message_local[4]*100+RX_Message_local[5], __ATOMIC_RELAXED);
     }
-    else if(knobCount[1]==0&&leftpos==0){//handling left slave
+    else if(knobCount[1]==0&&leftpos==0){//handling right slave
       mastervol = RX_Message_local[2];
       if(RX_Message_local[1]==0){
         masteroct = 0;
@@ -322,6 +351,10 @@ void decodeTask(void *pvParameters)
         masteroct = RX_Message_local[1] - 1;
       }
       masterwave = RX_Message_local[3];
+      __atomic_store_n(&recvkey, RX_Message_local[4]*100+RX_Message_local[5], __ATOMIC_RELAXED);
+    }
+    else{
+      __atomic_store_n(&recvkey, 4096, __ATOMIC_RELAXED);
     }
   }
 }
@@ -339,6 +372,8 @@ void CAN_TX_Task (void * pvParameters) {
       msgOut[1] = knobCount[2];//sending octave
       msgOut[2] = knobCount[3];//sending volume
       msgOut[3] = knobCount[0];//sending wavetype
+      msgOut[4] = keyVal/100;
+      msgOut[5] = keyVal%100;
       CAN_TX(0x123, msgOut);
     }
     
