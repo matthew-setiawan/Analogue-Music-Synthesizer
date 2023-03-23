@@ -15,8 +15,8 @@
   
   ## Video
   
- <iframe src="PEN-URL" width="100%" height="500"></iframe>
-
+  [![Everything Is AWESOME](https://img.youtube.com/vi/StTqXEQ2l-Y/0.jpg)](https://www.youtube.com/watch?v=StTqXEQ2l-Y "Everything Is AWESOME")
+  
   # Report
   
   This report focuses on the development of an embedded software for a music synthesizer circuit.
