@@ -44,9 +44,6 @@
 
 
   ### [2 Real-Time Programming](report/real_time_programming.md)
-  
-### 2. Real-Time Programming Techniques
-   
 
 #### 2.1 Design and Architecture
 
