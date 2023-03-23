@@ -1,11 +1,11 @@
 
 # 3. Real-Time System Analysis Report
 
-To evaluate the reliability of our system, it was necessary to conduct data analysis and statistical tests to observe and analyse the real-time performance of the system. To this end, our group conducted a series of measurements to determine the time required to complete specific tasks and performed critical instant analysis to verify whether each task could be completed before the respective deadlines. To study the overall behaviour of the system, we collected statistics from the FreeRTOS() operating system to show the time the real-world performance of the operating system. The relevant code and timing can be found in the test_timing branch.
+To evaluate the reliability of our system, it was necessary to conduct data analysis and statistical tests to observe and analyse the real-time performance of the system. To this end, our group conducted a series of measurements to determine the time required to complete specific tasks and performed critical instant analysis to verify whether each task could be completed before the respective deadlines. To study the overall behaviour of the system, we collected statistics from the FreeRTOS() operating system to show the time the real-world performance of the operating system. The relevant code and timing can be found in the test_timing branch and timing_report branch with timing_report showing how we used FREERTOS() to collect operational statistics.
 
 ### 3.1 Methodology
 
-To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.However, for CAN_RX tasks this .This was then validated with the FreeRTOS stats buffer timer which appeared to show similar estimated time values when timed for. When we tim
+To determine the timing requirements for tasks and interrupts, we computed the average execution time for each task across all 32 intervals.However,for CAN_RX tasks this was determined by examining the time taken for 36 occurence intervals by filling up the queue to a maximal size of 32 and recording the time accordingly.This was then validated with the FreeRTOS stats buffer timer which was initialized with a frequency of 10 KHz and appeared to show similar estimated time values as the manual time recordings obtained.
 
 Figure 1 and 2 demonstrate the timing analysis of tasks in the system.
 
@@ -41,7 +41,6 @@ To determine the critical instant analysis of each task we need to determine bot
 
 For instance, the scanKeysTask() only has a single interrupt and hence the time taken for this task can be determined as follows:
 
-
 $$ T_{scanKeysTask()} =\ T_{scankeysmeasured()} +\ T_{sampleISR} =\ 70.7\ +\ 11.3\ =\ 82.0\ \mu s $$
 
 ### 3.2.1 Determining Task Deadlines
@@ -75,7 +74,7 @@ After determining the interruptions and measured time per task, the following ta
 | CAN\_TX()* | 150 | 198.0 | 1 |
 | decode()* | 25.2 | 154.1 | 1 |
 
-*The executing and initiation times for the decode and CAN_TX task take the worst case scenario where there needs to be 36 messages placed into the queue to facilitate timing. This is the worst case scenario as the queue length is of size 36 and in practice should never occur. 
+*The executing and initiation times for the decode and CAN_TX task take the worst case scenario where there needs to be 36 messages placed into the queue to facilitate timing. This is the worst case scenario as the queue length is of size 36 and in practice should not occur. 
 
 From the above table we can see that the priority assigned is the same for all 3 of the displayTask(), CAN\_TX\_TASK(), and decodeTask(). The decision to do this was because it is important to ensure that display can be adequately handled to provide an essential user-interface, and this is equally important as CAN\_TX\_TASK() and decodeTask(). CAN and decodeTask() are important too as we need to ensure that sound can be broadcasted to different speakers. We decided to base our analysis on the task with CAN_TX_TASK() as this is the one with longest deadline and hence means that other tasks will occur more than once at each iteration. It will also provide the largest CPU utilization and toughet deadline to meet theoretically. as they have equal initiation times and are all lowest priority tasks. 
 
@@ -107,7 +106,7 @@ When considering the CPU utilisation, we assume that vTask scheduler can run all
 
 $$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ Time_i} [1] $$
 
-Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
+Deadline Time = 150ms (as determined by CAN_TX_TASK() in this rate monotonic scheduler). 
 
 $$ Execution-Time = T_{CAN-TX()} + T_{CAN-TX()}+\ 6T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} =\ 33475.0\ \mu s (from above)$$
 
@@ -127,10 +126,10 @@ Assume a word size of 4 bytes (32 bits) which results in a total stack size of 1
 This is relatively small compared to the total RAM available in the microcontroller suggesting that there is still room for increasing the stack size of individual tasks if needed. However, it is notable that increasing the stack size of a task will increase the total system stack size affecting the available RAM for other tasks; it’s important to balance the stack size of each task based on its requirements and the available microcontroller resources. 
 
 ## Obtaining Statistics from Operating System
-From further inspection, we used the PlatformIO operating system to exam the resource allocation. From this, we discovered that the overall RAM used was determined to be 18% while the flash memory utilized was determined as a total of 210 kb as obtained from the FREERTOS operating system. This is indicative that the RAM utiliation is relatively low suggesting that the CPU can handle the tasks in a relatively reliable and efficient manner. Meanwhile, while we can see that the flash memory is potentially high from figure below, it shows that there is still sufficient space to implement and developn new code if necessary.  
+To further understand the overall tasks and CPU memory requirements and constraints, we used the PlatformIO operating system to exam and inspect the resource allocation.The following figure was extracted from PlatformIO showing 
 
 <p align="center">
-<img src="/Images/deadlines.png" width="400" alt="Figure 3: CPU Utilization Observed from FreeRTOS System">
+<img src="/Images/deadlines.png" width="400" alt="Figure 3: RAM and Flash Memory Utilization Observed from FreeRTOS System">
   
   <p align="center">
     <em>
@@ -139,10 +138,12 @@ Figure 3: CPU Utilization Observed from FreeRTOS System
  </p>
 </p>
 
+From this, we discovered that the overall RAM used was determined to be 18% while the flash memory utilized was determined as a total of 210 kb as obtained from the FREERTOS operating system. This is indicative that the RAM utiliation is relatively low suggesting that the CPU can handle the tasks in a relatively reliable and efficient manner. While we can see that the flash memory is relatively high from figure below, it shows that there is still sufficient space to implement and develop new code if necessary to improve the system. Additionally, the analysis supports that the overall code is likely threadsafe and functional as there are no warnings or defects shown by the analysis when conducting a system inspect on the main.cpp code (defects reported exist due to external libraries present in the system and aren't indicative of faulty or broken code). 
 
-## 3.4 Real World Timing Statistics
 
-When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously. We hence conducted an analysis by enabling CAN mailboxes and then simply timing the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
+## 3.4 EXTRA TASK: Real World Timing Statistics
+
+When the real-time operating system is running, we decided to consider a realistic operation of the CAN\_TX\_TASK and CAN\_RX\_TASK rather than disabling mailboxes for simplifications. It is also realistic to have all tasks running simultaneously to examine which take the longest duration and consider hardware constraints. We hence conducted an analysis by enabling CAN mailboxes and then simply timed the rest of the tasks in the scheduler. After carrying out the FreeRTOS task utilization analysis the following ratios were determined for the percentage of time that the tasks ran.
 
 
 <p align="center">
