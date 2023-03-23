@@ -92,7 +92,7 @@ Hence, we know 3 occurrences of scanKeysTask() will occur within the displayTask
 
 ### 3.2.5 Latency Calculation
 
-$$ Ln\ =\ T_{CAN-TX()}+\ T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
+$$ Ln\ =\ T_{CAN-TX()}+\ 6T_{decode()}+\ 2T_{displayUpdate()}+\ 3\ast T_{scankeys()} $$
 
 $$ \ \ \ \ =\ \ 198+6*154.1+2\ast(15826)+3\ast(82.0)=\ 33475.0\ \mu s $$
 
@@ -109,8 +109,7 @@ $$ CPU \ Utilization = \sum\limits_{i=1}^n \frac{Execution \ Time_i}{Deadline \ 
 Deadline Time = 150ms (as determined by displayUpdate() in this rate monotonic 
 
 
-![formula](https://render.githubusercontent.com/render/math?math=%5Csum_%7Bi%3D1%7D%5En%20%5Ctext%7BExecution%20Time%7D_i%20%3D%20T_%7B%5Ctext%7BCAN%5C_TX%7D%7D()%20%2B%206%20%5Ccdot%20T_%7B%5Ctext%7Bdecode%7D%7D()%20%2B%202%20%5Ccdot%20T_%7B%5Ctext%7BdisplayUpdate%7D%7D()%20%2B%203%20%5Ccdot%20T_%7B%5Ctext%7BscanKeys%7D%7D()%20%3D%2033.475%20%5C%20%5Cmu%20s)
-
+$$ Execution_Time = T<sub>CAN_TX_TASK()</sub> + 3T<sub>scankeys()</sub>+2T<sub>displayUpdate()</sub>+6T<sub>decodeTask()</sub>
 
 Utilization = 33.475/150 = 22.31% (for a critical instant -- this was ascertained ).  
 
