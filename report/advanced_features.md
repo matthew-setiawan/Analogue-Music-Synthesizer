@@ -12,9 +12,7 @@
   | West     | 5    | 3      |
   | East     | 6    | 3      |
 
-In the music synthesizer, we implemented automatic octave detection across multiple boards by detecting the position of the connected boards using the inputs in the method explained above.
-
-When a board was connected to another board, it would detect the presence of the adjacent board by checking the voltage levels on the east and west detect pins. This information was then used to determine the position of the board in the chain and adjust the octave accordingly (make octave lower when it's a left slave and higher otherwise).
+Using this method, we could automatically detect if the master was at the left or right of the board. This information was then used to adjust the octave accordingly (make octave lower when it's a left slave and higher otherwise).
 
 ## 4.2 Advanced Waveforms
 
