@@ -1,7 +1,7 @@
 # Analogue-Music-Synthesizer - Embedded Systems Coursework 2
 
   # Running The Code
-  Navigate to https://github.com/matthew-setiawan/Analogue-Music-Synthesizer/tree/main/src to find main.cpp used to upload software to the board.
+  Navigate to https://github.com/matthew-setiawan/Analogue-Music-Synthesizer/tree/main/src to find main.cpp used to upload software to the board. Timing analysis code can be run and demonstrated by navigating to the test_timing branch and running the relevant code there. To observe how we conducted analysis with the FreeRTOS() stats buffer please navigate to the timing_report value. 
   
   # Using the Board
   
